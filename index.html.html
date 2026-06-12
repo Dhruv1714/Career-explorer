@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Career Explorer Game</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue-50: #E6F1FB; --blue-100: #B5D4F4; --blue-200: #85B7EB;
+    --blue-400: #378ADD; --blue-600: #185FA5; --blue-800: #0C447C; --blue-900: #042C53;
+    --teal-50: #E1F5EE; --teal-100: #9FE1CB; --teal-400: #1D9E75; --teal-600: #0F6E56; --teal-800: #085041;
+    --purple-50: #EEEDFE; --purple-100: #CECBF6; --purple-400: #7F77DD; --purple-600: #534AB7; --purple-800: #3C3489;
+    --amber-50: #FAEEDA; --amber-100: #FAC775; --amber-400: #BA7517; --amber-600: #854F0B; --amber-800: #633806;
+    --coral-50: #FAECE7; --coral-100: #F5C4B3; --coral-400: #D85A30; --coral-600: #993C1D; --coral-800: #712B13;
+    --gray-50: #F1EFE8; --gray-100: #D3D1C7; --gray-200: #B4B2A9; --gray-400: #888780; --gray-600: #5F5E5A;
+    --green-50: #EAF3DE; --green-400: #639922; --green-600: #3B6D11; --green-800: #27500A;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0C447C 0%, #042C53 50%, #0F6E56 100%);
+    min-height: 100vh;
+    padding: 24px 16px;
+    color: #1a1a2e;
+  }
+  .game-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .game-header {
+    text-align: center;
+    margin-bottom: 32px;
+    color: white;
+  }
+  .game-header .flag {
+    font-size: 40px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .game-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .game-header p {
+    font-size: 15px;
+    opacity: 0.85;
+    font-weight: 400;
+  }
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .progress-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.6);
+    background: transparent;
+  }
+  .step-circle.active {
+    background: white;
+    color: #185FA5;
+    border-color: white;
+  }
+  .step-circle.done {
+    background: #1D9E75;
+    color: white;
+    border-color: #1D9E75;
+  }
+  .step-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+  }
+  .step-label.active { color: white; font-weight: 600; }
+  .step-connector {
+    width: 36px;
+    height: 2px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px;
+  }
+  .step-connector.done { background: #1D9E75; }
+
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .panel-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #042C53;
+    margin-bottom: 6px;
+  }
+  .panel-subtitle {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 28px;
+  }
+
+  .stream-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .stream-card {
+    border: 2px solid #e8eaf0;
+    border-radius: 16px;
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    background: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .stream-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .stream-card.science-pcb { border-top: 4px solid #1D9E75; }
+  .stream-card.science-pcm { border-top: 4px solid #185FA5; }
+  .stream-card.commerce { border-top: 4px solid #BA7517; }
+  .stream-card.arts { border-top: 4px solid #534AB7; }
+  .stream-card:hover.science-pcb { border-color: #1D9E75; background: #f0fdf8; }
+  .stream-card:hover.science-pcm { border-color: #185FA5; background: #f0f6fd; }
+  .stream-card:hover.commerce { border-color: #BA7517; background: #fdf8f0; }
+  .stream-card:hover.arts { border-color: #534AB7; background: #f3f2fd; }
+  .stream-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .stream-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #042C53;
+  }
+  .stream-card p {
+    font-size: 12px;
+    color: var(--gray-400);
+    line-height: 1.5;
+  }
+  .stream-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-pcb { background: var(--teal-50); color: var(--teal-600); }
+  .badge-pcm { background: var(--blue-50); color: var(--blue-600); }
+  .badge-commerce { background: var(--amber-50); color: var(--amber-600); }
+  .badge-arts { background: var(--purple-50); color: var(--purple-600); }
+
+  .category-section { margin-bottom: 28px; }
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .category-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .category-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-600);
+  }
+  .profession-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 10px;
+  }
+  .profession-card {
+    border: 1.5px solid #eef0f4;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    background: white;
+  }
+  .profession-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  }
+  .profession-card .prof-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+  .profession-card .prof-name { font-size: 13px; font-weight: 600; color: #042C53; margin-bottom: 4px; }
+  .profession-card .prof-hint { font-size: 11px; color: var(--gray-400); line-height: 1.4; }
+
+  .pcb-card:hover { border-color: #1D9E75; background: #f0fdf8; }
+  .pcm-card:hover { border-color: #185FA5; background: #f0f6fd; }
+  .commerce-card:hover { border-color: #BA7517; background: #fdf8f0; }
+  .arts-card:hover { border-color: #534AB7; background: #f3f2fd; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-600);
+    background: var(--blue-50);
+    border: 1.5px solid var(--blue-100);
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 24px;
+    text-decoration: none;
+  }
+  .back-btn:hover { background: var(--blue-100); }
+
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid #f0f2f5;
+  }
+  .detail-icon-box {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    flex-shrink: 0;
+  }
+  .detail-title { font-size: 24px; font-weight: 700; color: #042C53; margin-bottom: 4px; }
+  .detail-category { font-size: 13px; color: var(--gray-400); }
+  .detail-stream-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .info-card {
+    background: #f8f9fc;
+    border: 1.5px solid #eef0f4;
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .info-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .info-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--gray-600);
+  }
+  .info-list { list-style: none; }
+  .info-list li {
+    font-size: 13px;
+    color: #2c3e50;
+    padding: 5px 0;
+    border-bottom: 1px solid #eef0f4;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+  .info-list li:last-child { border-bottom: none; }
+  .info-list li::before {
+    content: "▸";
+    font-size: 10px;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  .exam-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    margin: 3px 3px 3px 0;
+    background: var(--blue-50);
+    color: var(--blue-800);
+    border: 1px solid var(--blue-100);
+  }
+  .salary-bar {
+    background: #eef0f4;
+    border-radius: 8px;
+    height: 8px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .salary-fill {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #185FA5, #1D9E75);
+    transition: width 0.8s ease;
+  }
+  .salary-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .job-desc-card {
+    background: linear-gradient(135deg, #042C53 0%, #085041 100%);
+    border-radius: 14px;
+    padding: 20px;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .job-desc-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; opacity: 0.8; letter-spacing: 0.5px; text-transform: uppercase; }
+  .job-desc-card p { font-size: 14px; line-height: 1.7; opacity: 0.92; }
+  .top-recruiters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .recruiter-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .panel { padding: 20px 16px; }
+    .profession-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .game-header h1 { font-size: 22px; }
+    .step-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="game-wrapper">
+  <div class="game-header">
+    <span class="flag">🇮🇳</span>
+    <h1>India Career Explorer</h1>
+    <p>Discover your ideal career path in the Indian education system</p>
+  </div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-step">
+      <div class="step-circle active" id="step1circle">1</div>
+      <span class="step-label active" id="step1label">Choose Stream</span>
+    </div>
+    <div class="step-connector" id="conn1"></div>
+    <div class="progress-step">
+      <div class="step-circle" id="step2circle">2</div>
+      <span class="step-label" id="step2label">Choose Profession</span>
+    </div>
+    <div class="step-connector" id="conn2"></div>
+    <div class="progress-step">
+      <div class="step-circle" id="step3circle">3</div>
+      <span class="step-label" id="step3label">Career Details</span>
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <!-- STEP 1: STREAM SELECTION -->
+    <div id="step1">
+      <div class="panel-title">Which stream are you pursuing after 10th?</div>
+      <div class="panel-subtitle">Select your stream to explore career options tailored to your subjects</div>
+      <div class="stream-grid">
+        <div class="stream-card science-pcb" onclick="selectStream('pcb')">
+          <span class="stream-icon">🔬</span>
+          <h3>Science (PCB)</h3>
+          <p>Physics, Chemistry, Biology — for medical, life science & health careers</p>
+          <span class="stream-badge badge-pcb">Biology Focus</span>
+        </div>
+        <div class="stream-card science-pcm" onclick="selectStream('pcm')">
+          <span class="stream-icon">⚙️</span>
+          <h3>Science (PCM)</h3>
+          <p>Physics, Chemistry, Maths — for engineering, technology & design careers</p>
+          <span class="stream-badge badge-pcm">Maths Focus</span>
+        </div>
+        <div class="stream-card commerce" onclick="selectStream('commerce')">
+          <span class="stream-icon">📊</span>
+          <h3>Commerce</h3>
+          <p>Accounts, Economics, Business Studies — for finance & management careers</p>
+          <span class="stream-badge badge-commerce">Business Focus</span>
+        </div>
+        <div class="stream-card arts" onclick="selectStream('arts')">
+          <span class="stream-icon">🎨</span>
+          <h3>Arts & Humanities</h3>
+          <p>History, Political Science, Sociology — for law, media & social science careers</p>
+          <span class="stream-badge badge-arts">Creative Focus</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: PROFESSION SELECTION -->
+    <div id="step2" class="hidden">
+      <button class="back-btn" onclick="goToStep(1)">← Back to Streams</button>
+      <div class="panel-title" id="step2Title"></div>
+      <div class="panel-subtitle" id="step2Subtitle"></div>
+      <div id="professionList"></div>
+    </div>
+
+    <!-- STEP 3: CAREER DETAILS -->
+    <div id="step3" class="hidden">
+      <button class="back-btn" onclick="goToStep(2)">← Back to Professions</button>
+      <div id="careerDetails"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const DATA = {
+  pcb: {
+    name: "Science (PCB)",
+    subtitle: "Biology Focus — Medical, Health & Life Sciences",
+    color: "#1D9E75",
+    cardClass: "pcb-card",
+    badgeClass: "badge-pcb",
+    iconBg: "#E1F5EE",
+    categories: [
+      {
+        name: "Medicine & Surgery",
+        dot: "#1D9E75",
+        professions: [
+          {
+            id: "cardiologist",
+            icon: "❤️",
+            name: "Cardiologist",
+            hint: "Heart specialist & surgeon",
+            category: "Medicine & Surgery",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["NEET-UG", "NEET-PG", "AIIMS PG", "JIPMER PG"],
+            degrees: ["MBBS (5.5 yrs)", "MD – Cardiology (3 yrs)", "DM – Cardiology (3 yrs Super Specialisation)"],
+            topColleges: ["AIIMS New Delhi", "CMC Vellore", "JIPMER Puducherry", "Maulana Azad Medical College", "Grant Medical College Mumbai"],
+            jobDesc: "A Cardiologist diagnoses and treats diseases of the heart and blood vessels. They perform procedures such as cardiac catheterization, angioplasty, and pacemaker insertions, while also managing chronic conditions like hypertension and heart failure. Interventional cardiologists perform minimally invasive surgeries to open blocked arteries.",
+            salary: { min: "₹8–12 LPA (Junior)", mid: "₹20–40 LPA (Specialist)", max: "₹50–1 Cr+ (Senior/Private)" },
+            salaryPct: 92,
+            recruiters: ["AIIMS", "Apollo Hospitals", "Fortis Healthcare", "Manipal Hospitals", "Max Healthcare", "Narayana Health"],
+            skills: ["Electrocardiography (ECG)", "Echocardiography", "Cardiac Catheterization", "Patient diagnosis & management", "Surgical precision"]
+          },
+          {
+            id: "dermatologist",
+            icon: "🩺",
+            name: "Dermatologist",
+            hint: "Skin, hair & nail diseases",
+            category: "Medicine & Surgery",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["NEET-UG", "NEET-PG", "AIIMS PG"],
+            degrees: ["MBBS (5.5 yrs)", "MD – Dermatology, Venereology & Leprosy (3 yrs)"],
+            topColleges: ["AIIMS New Delhi", "PGIMER Chandigarh", "Seth GS Medical College Mumbai", "Bangalore Medical College", "SMS Medical College Jaipur"],
+            jobDesc: "A Dermatologist specialises in diagnosing and treating skin, hair, nail, and mucous membrane conditions. They manage conditions like acne, psoriasis, skin cancers, and perform cosmetic procedures such as laser therapy, Botox, and chemical peels. Cosmetology and aesthetic dermatology is a rapidly growing subspecialty in India.",
+            salary: { min: "₹6–10 LPA (Junior)", mid: "₹15–30 LPA (Specialist)", max: "₹40–80 LPA (Senior/Cosmetologist)" },
+            salaryPct: 82,
+            recruiters: ["Apollo Hospitals", "Kaya Skin Clinic", "VLCC", "Private Clinics", "Government Medical Colleges", "Fortis Healthcare"],
+            skills: ["Dermoscopy", "Skin biopsy", "Laser procedures", "Botox & fillers", "Clinical diagnosis"]
+          },
+          {
+            id: "pediatrician",
+            icon: "👶",
+            name: "Pediatrician",
+            hint: "Child health & development",
+            category: "Medicine & Surgery",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["NEET-UG", "NEET-PG"],
+            degrees: ["MBBS (5.5 yrs)", "MD – Paediatrics (3 yrs)", "DM – Neonatology / Paediatric Cardiology (optional)"],
+            topColleges: ["AIIMS New Delhi", "CMC Vellore", "KEM Hospital Mumbai", "PGIMER Chandigarh", "JIPMER Puducherry"],
+            jobDesc: "A Paediatrician provides medical care for infants, children, and adolescents from birth through 18 years. They diagnose and treat childhood illnesses, developmental disorders, and injuries, while also overseeing preventive healthcare including immunizations. Neonatologists handle critically ill newborns in ICU settings.",
+            salary: { min: "₹6–10 LPA (Junior)", mid: "₹12–25 LPA (Specialist)", max: "₹35–60 LPA (Senior)" },
+            salaryPct: 78,
+            recruiters: ["Rainbow Children's Hospital", "Cloudnine Hospitals", "AIIMS", "Apollo Cradle", "Government District Hospitals"],
+            skills: ["Child health assessment", "Immunization", "Neonatal care", "Developmental screening", "Patient communication"]
+          },
+          {
+            id: "neurologist",
+            icon: "🧠",
+            name: "Neurologist",
+            hint: "Brain, spine & nervous system",
+            category: "Medicine & Surgery",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["NEET-UG", "NEET-PG", "AIIMS PG"],
+            degrees: ["MBBS (5.5 yrs)", "MD – General Medicine (3 yrs)", "DM – Neurology (3 yrs Super Specialisation)"],
+            topColleges: ["AIIMS New Delhi", "NIMHANS Bengaluru", "CMC Vellore", "PGIMER Chandigarh", "Sanjay Gandhi PGI Lucknow"],
+            jobDesc: "A Neurologist diagnoses and treats disorders of the nervous system, including the brain, spinal cord, nerves, and muscles. They manage conditions like epilepsy, strokes, Parkinson's disease, multiple sclerosis, and dementia. Interventional neurologists also perform procedures like thrombectomy for acute stroke.",
+            salary: { min: "₹8–12 LPA (Junior)", mid: "₹25–50 LPA (Specialist)", max: "₹60–1.2 Cr (Senior)" },
+            salaryPct: 94,
+            recruiters: ["NIMHANS", "Fortis Memorial Research Institute", "Apollo Hospitals", "Narayana Health", "AIIMS"],
+            skills: ["EEG/EMG interpretation", "Brain imaging analysis", "Neurological examination", "Stroke management", "Neurointerventional procedures"]
+          },
+          {
+            id: "general_surgeon",
+            icon: "🔪",
+            name: "General Surgeon",
+            hint: "Surgical operations & procedures",
+            category: "Medicine & Surgery",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["NEET-UG", "NEET-PG"],
+            degrees: ["MBBS (5.5 yrs)", "MS – General Surgery (3 yrs)", "MCh – Surgical Subspecialities (optional)"],
+            topColleges: ["AIIMS New Delhi", "Safdarjung Hospital", "KEM Hospital Mumbai", "PGIMER Chandigarh", "Osmania Medical College"],
+            jobDesc: "A General Surgeon performs surgical procedures on the abdomen, digestive tract, endocrine system, breast, skin, and blood vessels. They handle emergency surgeries (appendicitis, trauma), laparoscopic procedures, and complex cancer resections. Subspecialties include oncosurgery, bariatric surgery, and transplant surgery.",
+            salary: { min: "₹7–12 LPA (Junior)", mid: "₹20–40 LPA (Specialist)", max: "₹50–1 Cr+ (Senior/Private)" },
+            salaryPct: 88,
+            recruiters: ["Apollo Hospitals", "Max Healthcare", "Medanta", "AIIMS", "Fortis Healthcare", "Wockhardt Hospitals"],
+            skills: ["Laparoscopic surgery", "Open surgery", "Wound management", "Trauma surgery", "Pre/post-operative care"]
+          }
+        ]
+      },
+      {
+        name: "Dental Sciences",
+        dot: "#0F6E56",
+        professions: [
+          {
+            id: "orthodontist",
+            icon: "🦷",
+            name: "Orthodontist",
+            hint: "Braces, teeth alignment",
+            category: "Dental Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics"],
+            exams: ["NEET-UG", "NEET-MDS"],
+            degrees: ["BDS – Bachelor of Dental Surgery (5 yrs)", "MDS – Orthodontics & Dentofacial Orthopaedics (3 yrs)"],
+            topColleges: ["Maulana Azad Institute of Dental Sciences Delhi", "KLE Dental College Belgaum", "Manipal College of Dental Sciences", "Saveetha Dental College Chennai", "SRM Dental College"],
+            jobDesc: "An Orthodontist specialises in diagnosing and treating misaligned teeth and jaws. They design and apply braces, aligners (e.g., Invisalign), and other corrective devices to straighten teeth, correct bite issues, and improve facial aesthetics. Digital dentistry and 3D imaging are transforming the field.",
+            salary: { min: "₹4–7 LPA (Junior)", mid: "₹10–20 LPA (Specialist)", max: "₹25–50 LPA (Own Clinic)" },
+            salaryPct: 68,
+            recruiters: ["Clove Dental", "Dentzz Dental", "Apollo White Dental", "Sabka Dentist", "Private Clinics", "Government Dental Colleges"],
+            skills: ["Cephalometric analysis", "Bracket placement", "Digital dentistry", "3D imaging", "Treatment planning"]
+          },
+          {
+            id: "periodontist",
+            icon: "🫦",
+            name: "Periodontist",
+            hint: "Gum disease specialist",
+            category: "Dental Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics"],
+            exams: ["NEET-UG", "NEET-MDS"],
+            degrees: ["BDS – Bachelor of Dental Surgery (5 yrs)", "MDS – Periodontics (3 yrs)"],
+            topColleges: ["Maulana Azad Institute of Dental Sciences", "Government Dental College Mumbai", "Manipal College of Dental Sciences", "JSS Dental College", "SDMCDS Dharwad"],
+            jobDesc: "A Periodontist specialises in the prevention, diagnosis, and treatment of periodontal disease (gum disease), and the placement of dental implants. They perform procedures such as scaling and root planing, flap surgery, bone grafts, and gum tissue grafts. They work closely with general dentists for comprehensive oral care.",
+            salary: { min: "₹4–8 LPA (Junior)", mid: "₹12–22 LPA (Specialist)", max: "₹30–60 LPA (Senior/Own Clinic)" },
+            salaryPct: 70,
+            recruiters: ["Clove Dental", "Oris Dental", "Private Clinics", "Dental Hospitals", "Dental Colleges", "Corporate Dental Chains"],
+            skills: ["Scaling & root planing", "Implantology", "Bone grafting", "Surgical dentistry", "Laser periodontal therapy"]
+          },
+          {
+            id: "maxillofacial_surgeon",
+            icon: "😷",
+            name: "Maxillofacial Surgeon",
+            hint: "Jaw, face & mouth surgery",
+            category: "Dental Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics"],
+            exams: ["NEET-UG", "NEET-MDS"],
+            degrees: ["BDS (5 yrs)", "MDS – Oral & Maxillofacial Surgery (3 yrs)", "Optional: MBBS for dual qualification"],
+            topColleges: ["AIIMS (Dental Wing)", "Maulana Azad Institute of Dental Sciences", "PGIMER Chandigarh", "Government Dental College Calicut", "Manipal Dental College"],
+            jobDesc: "An Oral & Maxillofacial Surgeon performs surgeries involving the mouth, jaw, face, head, and neck. They treat facial injuries, cleft palates, tumours, jaw misalignments, impacted wisdom teeth, and TMJ disorders. They operate at the intersection of medicine, dentistry, and surgery, often in hospital settings alongside ENT and plastic surgeons.",
+            salary: { min: "₹7–12 LPA (Junior)", mid: "₹18–35 LPA (Specialist)", max: "₹50–80 LPA (Senior)" },
+            salaryPct: 80,
+            recruiters: ["AIIMS", "Tata Memorial Centre", "Apollo Hospitals", "Government Medical Colleges", "Armed Forces Medical Services"],
+            skills: ["Oral surgery", "Craniofacial surgery", "Oncologic surgery", "Trauma management", "Implant placement"]
+          }
+        ]
+      },
+      {
+        name: "Allied Health & Nursing",
+        dot: "#085041",
+        professions: [
+          {
+            id: "physiotherapist",
+            icon: "🦾",
+            name: "Physiotherapist",
+            hint: "Movement & rehabilitation",
+            category: "Allied Health & Nursing",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry", "Physics", "English"],
+            exams: ["State CET / University Entrance", "Some Private Colleges: Direct Admission", "AIIMS BPT Entrance"],
+            degrees: ["BPT – Bachelor of Physiotherapy (4.5 yrs incl. 6-month internship)", "MPT – Master of Physiotherapy (2 yrs, optional)", "PhD in Physiotherapy (optional)"],
+            topColleges: ["AIIMS Delhi (Paramedical)", "NIMHANS Bengaluru", "Manipal Academy of Higher Education", "SRM Institute", "Amity University", "Maharashtra State Colleges"],
+            jobDesc: "A Physiotherapist helps patients restore movement, reduce pain, and recover from injuries, surgeries, strokes, and chronic conditions using manual therapy, exercise prescription, electrotherapy, and hydrotherapy. Specialisations include sports physiotherapy, neurological rehab, paediatric physio, and cardiopulmonary physio.",
+            salary: { min: "₹3–5 LPA (Junior)", mid: "₹6–12 LPA (Specialist)", max: "₹15–25 LPA (Senior/Sports)" },
+            salaryPct: 55,
+            recruiters: ["Apollo Hospitals", "Fortis Healthcare", "Sports Authority of India (SAI)", "Rehabilitation Centres", "Defence Services", "Private Clinics"],
+            skills: ["Manual therapy", "Exercise therapy", "Electrotherapy", "Sports injury management", "Patient assessment"]
+          },
+          {
+            id: "nursing_superintendent",
+            icon: "🏥",
+            name: "Nursing Superintendent",
+            hint: "Senior nursing leadership",
+            category: "Allied Health & Nursing",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry", "Physics", "English"],
+            exams: ["NEET (for B.Sc Nursing in some states)", "AIIMS B.Sc Nursing Entrance", "PGIMER B.Sc Nursing", "State Nursing Entrance Exams"],
+            degrees: ["B.Sc Nursing (4 yrs)", "M.Sc Nursing (2 yrs, optional)", "Post Basic B.Sc Nursing for GNM holders"],
+            topColleges: ["AIIMS Delhi (Nursing College)", "PGIMER Chandigarh", "Rajiv Gandhi University of Health Sciences", "Manipal College of Nursing", "CMC Vellore"],
+            jobDesc: "A Nursing Superintendent manages the nursing staff of an entire hospital or large department. They oversee staffing, training, quality standards, infection control, and budget planning. They bridge clinical care and hospital administration, ensuring patient safety. Senior nurses can also become Chief Nursing Officers (CNOs).",
+            salary: { min: "₹3–5 LPA (Staff Nurse)", mid: "₹7–14 LPA (Senior/Superintendent)", max: "₹15–25 LPA (CNO/Government)" },
+            salaryPct: 52,
+            recruiters: ["AIIMS", "Government Hospitals (State Cadre)", "Apollo Hospitals", "Fortis Healthcare", "Max Healthcare", "Defence Nursing Service"],
+            skills: ["Clinical nursing", "Staff management", "Infection control", "Healthcare administration", "Emergency care"]
+          },
+          {
+            id: "radiologist_tech",
+            icon: "🔭",
+            name: "Radiology Technologist",
+            hint: "X-ray, MRI & imaging",
+            category: "Allied Health & Nursing",
+            stream: "Science (PCB)",
+            subjects: ["Biology", "Physics (Mandatory)", "Chemistry", "English"],
+            exams: ["JIPMER Allied Health Entrance", "AIIMS Paramedical Entrance", "State CET / University Entrance"],
+            degrees: ["B.Sc – Medical Imaging Technology / Radiology (3–4 yrs)", "Diploma in Medical Radiology & Imaging Technology (2 yrs)", "M.Sc Medical Imaging (optional)"],
+            topColleges: ["AIIMS Delhi", "PGIMER Chandigarh", "JIPMER Puducherry", "Manipal Academy", "SRM University"],
+            jobDesc: "A Radiology Technologist (also called Radiographer) operates imaging equipment like X-ray machines, CT scanners, MRI machines, and ultrasound devices to produce diagnostic images. They work under the supervision of Radiologists (doctors), ensuring patient safety and image quality. Specialisations include CT, MRI, nuclear medicine, and mammography.",
+            salary: { min: "₹2.5–4 LPA (Junior)", mid: "₹5–10 LPA (Specialist)", max: "₹12–18 LPA (Senior/CT/MRI Specialist)" },
+            salaryPct: 48,
+            recruiters: ["Narayana Health", "Apollo Hospitals", "Fortis Healthcare", "Metropolis Healthcare", "Dr Lal PathLabs", "Government Hospitals"],
+            skills: ["Radiographic techniques", "MRI operation", "CT scanning", "Patient positioning", "Radiation safety"]
+          }
+        ]
+      },
+      {
+        name: "Pharma & Life Sciences",
+        dot: "#1D9E75",
+        professions: [
+          {
+            id: "pharmacist",
+            icon: "💊",
+            name: "Pharmacist",
+            hint: "Drug dispensing & counselling",
+            category: "Pharma & Life Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["GPAT – Graduate Pharmacy Aptitude Test (for PG)", "State Pharmacy Entrance Exams", "MHT-CET, TS EAMCET for B.Pharm"],
+            degrees: ["D.Pharm – Diploma (2 yrs)", "B.Pharm – Bachelor of Pharmacy (4 yrs)", "M.Pharm – Master of Pharmacy (2 yrs)", "Pharm.D – Doctor of Pharmacy (6 yrs)"],
+            topColleges: ["JSS College of Pharmacy Ooty", "Bombay College of Pharmacy", "Manipal College of Pharmaceutical Sciences", "NIPER Mohali", "Jamia Hamdard University"],
+            jobDesc: "A Pharmacist ensures safe and effective use of medication. They work in retail pharmacies, hospitals, pharmaceutical companies, and research labs. Roles include dispensing prescriptions, counselling patients, ensuring drug-drug interaction checks, clinical pharmacy in hospitals, and pharmaceutical R&D. Regulatory affairs and quality control are also major career branches.",
+            salary: { min: "₹2.5–5 LPA (Retail/Hospital)", mid: "₹6–12 LPA (Industry/Clinical)", max: "₹15–30 LPA (Senior/R&D/Regulatory)" },
+            salaryPct: 58,
+            recruiters: ["Sun Pharmaceutical", "Cipla", "Dr. Reddy's Laboratories", "Lupin", "Apollo Pharmacy", "Max Healthcare"],
+            skills: ["Drug dispensing", "Pharmacovigilance", "Clinical pharmacy", "Drug formulation", "Regulatory affairs"]
+          },
+          {
+            id: "biotechnologist",
+            icon: "🧬",
+            name: "Biotechnologist",
+            hint: "Genetic research & biotech",
+            category: "Pharma & Life Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["JEE Main (for B.Tech Biotech)", "CUET (for B.Sc Biotech)", "ICAR (for Agriculture Biotech)", "JNUEE", "BHU UET"],
+            degrees: ["B.Sc / B.Tech – Biotechnology (3–4 yrs)", "M.Sc – Biotechnology (2 yrs)", "Ph.D – Biotechnology (optional for research)"],
+            topColleges: ["IIT Bombay (Biosciences)", "Delhi University (DU)", "JNU New Delhi", "BHU Varanasi", "Manipal University", "VIT University"],
+            jobDesc: "A Biotechnologist applies biological systems and living organisms to develop products and technologies for medicine, agriculture, and environmental management. Roles include genetic engineering, vaccine development, bioinformatics, fermentation technology, and clinical trials. India's biotech industry (Biocon, Serum Institute) is a global leader.",
+            salary: { min: "₹3–6 LPA (Entry Level)", mid: "₹8–18 LPA (Mid Level)", max: "₹25–50 LPA (Research Lead/Senior)" },
+            salaryPct: 65,
+            recruiters: ["Biocon", "Serum Institute of India", "Dr. Reddy's", "Panacea Biotech", "CSIR Labs", "ICMR"],
+            skills: ["Gene sequencing", "PCR & cell culture", "Bioinformatics", "Fermentation technology", "Regulatory compliance"]
+          },
+          {
+            id: "clinical_research",
+            icon: "📋",
+            name: "Clinical Research Associate",
+            hint: "Drug trials & medical data",
+            category: "Pharma & Life Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["CUET / State Entrance (B.Sc)", "Specialised CRA certification post-graduation"],
+            degrees: ["B.Sc – Life Sciences / Pharmacy / Biotech (3–4 yrs)", "M.Sc Clinical Research (2 yrs)", "PG Diploma in Clinical Research (1 yr)"],
+            topColleges: ["Symbiosis Institute of Health Sciences Pune", "Jamia Hamdard", "NIPER Mohali", "Manipal Academy", "BITS Pilani"],
+            jobDesc: "A Clinical Research Associate (CRA) monitors clinical trials to ensure they follow protocols, regulatory requirements (CDSCO, ICH-GCP), and ethical guidelines. They visit trial sites, verify patient data, train site staff, and prepare regulatory submissions for new drug approvals. India is a major hub for global clinical trials.",
+            salary: { min: "₹3–6 LPA (Junior CRA)", mid: "₹8–16 LPA (CRA/Senior CRA)", max: "₹20–35 LPA (Clinical Trial Manager)" },
+            salaryPct: 60,
+            recruiters: ["IQVIA", "Covance", "Quintiles", "Parexel", "Sun Pharma", "Dr. Reddy's", "Biocon"],
+            skills: ["GCP (Good Clinical Practice)", "Protocol adherence", "Data monitoring", "Regulatory submissions", "Patient safety reporting"]
+          }
+        ]
+      },
+      {
+        name: "Veterinary Sciences",
+        dot: "#0F6E56",
+        professions: [
+          {
+            id: "wildlife_vet",
+            icon: "🐯",
+            name: "Wildlife Veterinarian",
+            hint: "Conservation & wildlife health",
+            category: "Veterinary Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["ICAR AIEEA-UG (for BVSc & AH)"],
+            degrees: ["BVSc & AH – Bachelor of Veterinary Science & Animal Husbandry (5.5 yrs incl. 1-year internship)", "MVSc – Wildlife & Exotic Animals (optional)"],
+            topColleges: ["IVRI Bareilly", "Bombay Veterinary College", "Tamil Nadu Veterinary University Chennai", "GADVASU Ludhiana", "Karnataka Veterinary University"],
+            jobDesc: "A Wildlife Veterinarian provides medical care for wild, exotic, and zoo animals. They conduct health surveys in national parks and sanctuaries, handle tranquillisation operations for census or translocation, treat injured wildlife, and support conservation breeding programmes. They work with organisations like WWF, WCS, Wildlife Institute of India, and forest departments.",
+            salary: { min: "₹3–6 LPA (Entry Level)", mid: "₹8–15 LPA (Specialist)", max: "₹18–30 LPA (Senior/International)" },
+            salaryPct: 50,
+            recruiters: ["Wildlife Institute of India", "Forest Department (NTCA)", "Zoological Survey of India", "WWF India", "WCS India", "Zoos (NZPA members)"],
+            skills: ["Wildlife immobilisation", "Conservation medicine", "Animal surgery", "Zoo animal management", "Field disease surveillance"]
+          },
+          {
+            id: "livestock_specialist",
+            icon: "🐄",
+            name: "Livestock Specialist",
+            hint: "Farm animal health & husbandry",
+            category: "Veterinary Sciences",
+            stream: "Science (PCB)",
+            subjects: ["Biology (Mandatory)", "Chemistry (Mandatory)", "Physics", "English"],
+            exams: ["ICAR AIEEA-UG"],
+            degrees: ["BVSc & AH (5.5 yrs)", "MVSc – Animal Reproduction / Large Animal Medicine (optional)", "NABARD / IBPS for banking & agribusiness roles"],
+            topColleges: ["IVRI Bareilly", "Guru Angad Dev Veterinary University Ludhiana", "Tamil Nadu Vet University", "Maharashtra Animal & Fishery Sciences University", "Rajasthan University of Veterinary Sciences"],
+            jobDesc: "A Livestock Specialist (Veterinary Officer / Animal Husbandry Officer) manages the health, breeding, and productivity of farm animals — cattle, buffalo, poultry, goat, sheep, and pigs. They vaccinate herds, diagnose and treat animal diseases, advise farmers on nutrition and management, and support government animal health programmes under the National Animal Disease Control Programme (NADCP).",
+            salary: { min: "₹4–7 LPA (Govt. Officer)", mid: "₹8–15 LPA (Senior Officer)", max: "₹18–28 LPA (Management/Industry)" },
+            salaryPct: 52,
+            recruiters: ["State Animal Husbandry Departments", "National Dairy Development Board (NDDB)", "BAIF Development Research Foundation", "Suguna Foods", "Venky's India"],
+            skills: ["Large animal medicine", "Reproductive technologies (AI)", "Vaccination programmes", "Herd health management", "Dairy farm management"]
+          }
+        ]
+      }
+    ]
+  },
+
+  pcm: {
+    name: "Science (PCM)",
+    subtitle: "Maths Focus — Engineering, Technology & Design",
+    color: "#185FA5",
+    cardClass: "pcm-card",
+    badgeClass: "badge-pcm",
+    iconBg: "#E6F1FB",
+    categories: [
+      {
+        name: "Software & Emerging Technology",
+        dot: "#378ADD",
+        professions: [
+          {
+            id: "ai_ml_engineer",
+            icon: "🤖",
+            name: "AI/ML Engineer",
+            hint: "Artificial intelligence & deep learning",
+            category: "Software & Emerging Technology",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Computer Science", "English"],
+            exams: ["JEE Main", "JEE Advanced (for IITs)", "BITSAT", "VITEEE", "MHT-CET", "State CETs"],
+            degrees: ["B.Tech – CSE / AI & ML / Data Science (4 yrs)", "M.Tech – AI/ML (optional)", "BCA + MCA pathway (alternate)"],
+            topColleges: ["IIT Bombay", "IIT Delhi", "IIT Madras", "IIIT Hyderabad", "NIT Warangal", "BITS Pilani", "VIT Vellore"],
+            jobDesc: "An AI/ML Engineer designs, builds, and deploys machine learning models and artificial intelligence systems. They work on natural language processing, computer vision, recommendation engines, and predictive analytics. In India, AI engineers are in high demand at tech giants, fintech firms, and startups across sectors from healthcare to agriculture.",
+            salary: { min: "₹6–12 LPA (Fresher)", mid: "₹18–35 LPA (Mid Level)", max: "₹50 LPA–1 Cr+ (Senior/FAANG)" },
+            salaryPct: 95,
+            recruiters: ["Google India", "Microsoft", "Amazon", "Flipkart", "Infosys", "TCS", "Ola", "Zomato", "PhonePe"],
+            skills: ["Python / TensorFlow / PyTorch", "Deep learning & neural networks", "NLP & computer vision", "MLOps & model deployment", "Statistics & probability"]
+          },
+          {
+            id: "fullstack_developer",
+            icon: "💻",
+            name: "Full-Stack Web Developer",
+            hint: "Front-end & back-end web apps",
+            category: "Software & Emerging Technology",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Computer Science", "English"],
+            exams: ["JEE Main", "BITSAT", "VITEEE", "MHT-CET", "State CETs"],
+            degrees: ["B.Tech – CSE (4 yrs)", "BCA (3 yrs)", "BCA + MCA (3+2 yrs)", "B.Sc Computer Science (3 yrs)"],
+            topColleges: ["IIT Bombay", "NIT Trichy", "BITS Pilani", "VIT Vellore", "Manipal University", "SRM University", "Amity University"],
+            jobDesc: "A Full-Stack Web Developer builds complete web applications handling both the user interface (front-end: React, Angular) and the server/database layer (back-end: Node.js, Django, databases). They are versatile engineers capable of building startups end-to-end and are among the most sought-after profiles in the Indian tech industry.",
+            salary: { min: "₹4–8 LPA (Fresher)", mid: "₹12–25 LPA (Mid Level)", max: "₹35–60 LPA (Senior/Lead)" },
+            salaryPct: 82,
+            recruiters: ["Infosys", "TCS", "Wipro", "Razorpay", "Zepto", "MakeMyTrip", "Swiggy", "Startup Ecosystem"],
+            skills: ["React.js / Vue.js (Front-end)", "Node.js / Django (Back-end)", "SQL / MongoDB (Databases)", "REST APIs & GraphQL", "DevOps & Git"]
+          },
+          {
+            id: "cybersecurity_analyst",
+            icon: "🛡️",
+            name: "Cybersecurity Analyst",
+            hint: "Network & information security",
+            category: "Software & Emerging Technology",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Computer Science", "English"],
+            exams: ["JEE Main", "BITSAT", "VITEEE", "CDAC C-CAT (PG diploma route)"],
+            degrees: ["B.Tech – CSE / Information Security (4 yrs)", "BCA + MCA (alternate)", "PG Diploma in Cyber Security from CDAC"],
+            topColleges: ["IIT Madras", "IIIT Hyderabad", "DTU Delhi", "NIT Warangal", "CDAC (Multiple Centres)", "SRM University"],
+            jobDesc: "A Cybersecurity Analyst protects computer systems, networks, and data from digital attacks, breaches, and unauthorised access. They conduct vulnerability assessments, penetration testing, incident response, and security audits. With India facing rising cyber threats and mandatory CERT-In compliance, demand for cybersecurity professionals has surged dramatically.",
+            salary: { min: "₹5–9 LPA (Junior Analyst)", mid: "₹15–28 LPA (Mid Level)", max: "₹40–70 LPA (CISO/Security Architect)" },
+            salaryPct: 85,
+            recruiters: ["TCS Cyber Security", "Wipro", "HCL Technologies", "Infosys Cyber Next", "CERT-In", "IBM India", "Palo Alto Networks"],
+            skills: ["Ethical hacking & pen testing", "Network security", "SIEM tools", "Cloud security (AWS/Azure)", "ISO 27001 / GDPR compliance"]
+          },
+          {
+            id: "data_scientist",
+            icon: "📈",
+            name: "Data Scientist",
+            hint: "Big data & statistical modelling",
+            category: "Software & Emerging Technology",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Computer Science", "English"],
+            exams: ["JEE Main", "JEE Advanced", "BITSAT", "VITEEE", "State CETs"],
+            degrees: ["B.Tech – CSE / Data Science (4 yrs)", "B.Sc Statistics / Maths + M.Sc Data Science", "MBA + Data Science specialisation"],
+            topColleges: ["IIT Delhi", "ISI Kolkata", "CMI Chennai", "IIM Bangalore (MBA-BA)", "NIT Trichy", "IIIT Hyderabad"],
+            jobDesc: "A Data Scientist extracts actionable insights from large datasets using statistical analysis, machine learning, and visualisation tools. They build predictive models for business decisions in finance, e-commerce, healthcare, and logistics. India is a global hub for data science talent, with major demand from BFSI, telecom, and tech companies.",
+            salary: { min: "₹6–12 LPA (Entry Level)", mid: "₹18–35 LPA (Mid Level)", max: "₹50 LPA–1 Cr (Senior/Lead)" },
+            salaryPct: 90,
+            recruiters: ["Amazon", "Flipkart", "PhonePe", "HDFC Bank", "Goldman Sachs India", "McKinsey", "BCG", "Zomato"],
+            skills: ["Python / R / SQL", "Machine learning algorithms", "Data visualisation (Tableau/PowerBI)", "Statistical analysis", "Big data (Spark/Hadoop)"]
+          }
+        ]
+      },
+      {
+        name: "Core Engineering",
+        dot: "#185FA5",
+        professions: [
+          {
+            id: "aerospace_engineer",
+            icon: "🚀",
+            name: "Aerospace Engineer",
+            hint: "Aircraft & spacecraft design",
+            category: "Core Engineering",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics (Mandatory)", "Chemistry", "English"],
+            exams: ["JEE Main", "JEE Advanced (for IITs)", "BITSAT", "IIST Entrance (for ISRO pathway)"],
+            degrees: ["B.Tech – Aerospace Engineering (4 yrs)", "Dual Degree B.Tech+M.Tech (IIT, 5 yrs)", "B.Tech + GATE for M.Tech (PSU pathway)"],
+            topColleges: ["IIT Bombay", "IIT Madras", "IIT Kharagpur", "IIST Thiruvananthapuram", "PEC Chandigarh", "Amrita University"],
+            jobDesc: "An Aerospace Engineer designs, develops, tests, and maintains aircraft, spacecraft, satellites, missiles, and related systems. In India, key employers are ISRO, DRDO, HAL, and NAL. With India's growing space economy (PSLV, Gaganyaan, private space startups like Skyroot and Agnikul), opportunities are expanding beyond government to private aerospace.",
+            salary: { min: "₹6–10 LPA (Entry Level)", mid: "₹12–25 LPA (Engineer)", max: "₹30–60 LPA (Senior/ISRO Scientist)" },
+            salaryPct: 75,
+            recruiters: ["ISRO", "DRDO", "HAL – Hindustan Aeronautics", "NAL Bengaluru", "Safran India", "Airbus India", "Boeing India"],
+            skills: ["Computational fluid dynamics (CFD)", "Structural analysis (FEM)", "Propulsion systems", "MATLAB / ANSYS / CATIA", "Systems engineering"]
+          },
+          {
+            id: "robotics_engineer",
+            icon: "🦿",
+            name: "Robotics/Mechatronics Engineer",
+            hint: "Robots & automation systems",
+            category: "Core Engineering",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics (Mandatory)", "Computer Science", "English"],
+            exams: ["JEE Main", "JEE Advanced", "BITSAT", "VITEEE"],
+            degrees: ["B.Tech – Mechanical Engineering / Electronics & Instrumentation / Mechatronics (4 yrs)", "M.Tech – Robotics & Automation (optional)"],
+            topColleges: ["IIT Bombay", "IIT Kanpur", "IIT Ropar", "BITS Pilani Hyderabad Campus", "NIT Surathkal", "SRM University"],
+            jobDesc: "A Robotics/Mechatronics Engineer designs automated systems combining mechanical, electrical, and software engineering. They develop industrial robots, autonomous vehicles, drones, prosthetics, and smart manufacturing systems. India's Industry 4.0 push and the production-linked incentive scheme are driving manufacturing automation across sectors.",
+            salary: { min: "₹5–9 LPA (Entry Level)", mid: "₹12–22 LPA (Mid Level)", max: "₹28–50 LPA (Lead Engineer/R&D)" },
+            salaryPct: 74,
+            recruiters: ["ABB India", "Fanuc India", "Tata Elxsi", "Bosch India", "Mahindra Engineering", "Kuka Robotics", "Ola Electric"],
+            skills: ["ROS (Robot Operating System)", "PLC / SCADA programming", "3D modelling (SolidWorks)", "Embedded systems (Arduino/Raspberry Pi)", "Control systems design"]
+          },
+          {
+            id: "civil_engineer",
+            icon: "🏗️",
+            name: "Civil/Structural Engineer",
+            hint: "Buildings, bridges & infrastructure",
+            category: "Core Engineering",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics (Mandatory)", "Chemistry", "English"],
+            exams: ["JEE Main", "JEE Advanced", "BITSAT", "MHT-CET", "State CETs", "GATE (for PSUs/M.Tech)"],
+            degrees: ["B.Tech / B.E – Civil Engineering (4 yrs)", "M.Tech – Structural / Geotechnical / Environmental Engineering (optional)"],
+            topColleges: ["IIT Roorkee", "IIT Delhi", "IIT Madras", "NIT Tiruchirappalli", "BITS Pilani", "Delhi Technological University"],
+            jobDesc: "A Civil/Structural Engineer designs, builds, and maintains infrastructure such as roads, bridges, dams, airports, metros, and skyscrapers. With India's massive infrastructure push (PM GatiShakti, Smart Cities Mission, RERA), demand for civil engineers in both government projects (NHAI, RITES, IRCON) and private construction (L&T, DLF) is consistently high.",
+            salary: { min: "₹4–7 LPA (Junior Engineer)", mid: "₹10–22 LPA (Project Engineer)", max: "₹28–60 LPA (Senior PM/Consultant)" },
+            salaryPct: 70,
+            recruiters: ["L&T Construction", "NHAI", "RITES", "IRCON", "DLF", "GMR Group", "Gammon India", "State PWDs"],
+            skills: ["Structural analysis (STAAD Pro / ETABS)", "AutoCAD / Revit BIM", "Project management (PMP)", "Soil mechanics", "Construction contracts management"]
+          },
+          {
+            id: "mechanical_design_engineer",
+            icon: "⚙️",
+            name: "Mechanical Design Engineer",
+            hint: "Product & machine design",
+            category: "Core Engineering",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics (Mandatory)", "Chemistry", "English"],
+            exams: ["JEE Main", "JEE Advanced", "BITSAT", "State CETs", "GATE (for PSUs)"],
+            degrees: ["B.Tech / B.E – Mechanical Engineering (4 yrs)", "M.Tech – Design/Manufacturing (optional)"],
+            topColleges: ["IIT Bombay", "IIT Madras", "NIT Warangal", "BITS Pilani", "VIT Vellore", "DTU Delhi"],
+            jobDesc: "A Mechanical Design Engineer creates detailed designs and CAD models for mechanical components, systems, and products from automobiles to industrial machines. They use simulation software to test designs before physical prototyping. Key sectors include automotive (Tata, Maruti, Mahindra), aerospace, defence, and capital goods manufacturing.",
+            salary: { min: "₹4–7 LPA (Fresher)", mid: "₹10–20 LPA (Design Engineer)", max: "₹25–50 LPA (Chief Design Engineer)" },
+            salaryPct: 68,
+            recruiters: ["Tata Motors", "Mahindra & Mahindra", "ISRO", "DRDO", "Bosch India", "John Deere India", "Caterpillar India"],
+            skills: ["CATIA / SolidWorks / CREO", "Finite Element Analysis (FEA)", "GD&T (Geometric Dimensioning)", "Thermodynamics & fluid mechanics", "Manufacturing processes"]
+          },
+          {
+            id: "chemical_engineer",
+            icon: "⚗️",
+            name: "Chemical Engineer",
+            hint: "Process & plant engineering",
+            category: "Core Engineering",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Chemistry (Mandatory)", "English"],
+            exams: ["JEE Main", "JEE Advanced", "BITSAT", "MHT-CET", "GATE (for PSUs/M.Tech)"],
+            degrees: ["B.Tech / B.E – Chemical Engineering (4 yrs)", "M.Tech – Process Design / Petroleum Engineering (optional)"],
+            topColleges: ["IIT Bombay", "IIT Delhi", "IIT Madras", "ICT Mumbai", "NIT Rourkela", "BIT Sindri"],
+            jobDesc: "A Chemical Engineer designs and operates large-scale processes to produce chemicals, fuels, pharmaceuticals, food products, and materials. They work in refineries, fertilizer plants, pharma manufacturing, and polymer industries. India's petrochemical sector (Reliance Industries, ONGC, IOCL) and pharma manufacturing sector offer vast opportunities.",
+            salary: { min: "₹4–8 LPA (Junior Engineer)", mid: "₹12–22 LPA (Process Engineer)", max: "₹30–60 LPA (Plant Head/Consultant)" },
+            salaryPct: 72,
+            recruiters: ["Reliance Industries", "ONGC", "IOCL", "GAIL", "BPCL", "Asian Paints", "Dr. Reddy's", "Tata Chemicals"],
+            skills: ["Process simulation (ASPEN Plus)", "Heat & mass transfer", "Reaction engineering", "Process safety (HAZOP)", "Plant design & scale-up"]
+          }
+        ]
+      },
+      {
+        name: "Architecture & Design",
+        dot: "#0C447C",
+        professions: [
+          {
+            id: "urban_planner",
+            icon: "🏙️",
+            name: "Urban Planner",
+            hint: "City design & smart cities",
+            category: "Architecture & Design",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Drawing/Fine Arts (advantageous)", "English"],
+            exams: ["NATA (National Aptitude Test in Architecture)", "JEE Paper 2 (B.Arch at NITs/IITs)", "CEED (for M.Des)"],
+            degrees: ["B.Arch (5 yrs)", "M.Plan – Masters in Urban Planning (2 yrs, post B.Arch or B.E)", "M.Sc Urban Management"],
+            topColleges: ["SPA New Delhi", "CEPT University Ahmedabad", "IIT Kharagpur", "IIT Roorkee", "Chandigarh College of Architecture", "NIT Calicut"],
+            jobDesc: "An Urban Planner shapes how cities grow and function by designing land use policies, transportation networks, zoning regulations, and public spaces. They work for city development authorities (DUDA, HMDA, BMRDA), the Smart Cities Mission, and private real estate developers. Growing urbanisation in India makes this a critical profession.",
+            salary: { min: "₹4–7 LPA (Junior Planner)", mid: "₹10–20 LPA (Town Planner)", max: "₹25–50 LPA (Chief Planner/Consultant)" },
+            salaryPct: 62,
+            recruiters: ["TCPO (Town and Country Planning)", "DUDA/HMDA", "Smart Cities Mission SPV", "AECOM India", "Mott MacDonald", "L&T Realty"],
+            skills: ["GIS & remote sensing", "Urban design & zoning", "Transport planning", "Environmental impact assessment", "Urban economics"]
+          },
+          {
+            id: "commercial_architect",
+            icon: "🏛️",
+            name: "Commercial Architect",
+            hint: "Building design & construction",
+            category: "Architecture & Design",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "Drawing/Fine Arts", "English"],
+            exams: ["NATA", "JEE Paper 2"],
+            degrees: ["B.Arch (5 yrs – Council of Architecture regulated)", "M.Arch – Interior Design / Sustainable Architecture (optional)"],
+            topColleges: ["SPA New Delhi", "CEPT Ahmedabad", "IIT Bombay (KRVIA)", "IIT Kharagpur", "Kamla Raheja Vidyanidhi College Mumbai", "RVCA Bengaluru"],
+            jobDesc: "A Commercial Architect designs commercial, corporate, retail, and public buildings with a focus on functionality, aesthetics, safety codes, and sustainability. They create detailed construction documents, coordinate with structural and MEP engineers, and supervise construction. India's booming commercial real estate and infrastructure sector creates high demand.",
+            salary: { min: "₹3.5–6 LPA (Junior Architect)", mid: "₹10–22 LPA (Project Architect)", max: "₹30–60 LPA (Principal Architect/Partner)" },
+            salaryPct: 65,
+            recruiters: ["Gensler India", "HOK", "ARCOP", "Hafeez Contractor", "Morphogenesis", "L&T Construction", "DLF Limited"],
+            skills: ["AutoCAD / Revit / BIM", "3D rendering (3ds Max / Lumion)", "Green building & LEED", "Construction documentation", "Project management"]
+          },
+          {
+            id: "landscape_architect",
+            icon: "🌿",
+            name: "Landscape Architect",
+            hint: "Parks, gardens & outdoor spaces",
+            category: "Architecture & Design",
+            stream: "Science (PCM)",
+            subjects: ["Maths", "Biology/Botany", "Drawing", "English"],
+            exams: ["NATA", "State Architecture Entrance", "IIFM entrance (for landscape management)"],
+            degrees: ["B.Arch (5 yrs) with landscape focus", "B.Sc Horticulture (4 yrs)", "M.LA – Masters in Landscape Architecture (2 yrs)", "PG Diploma in Landscape Design"],
+            topColleges: ["SPA New Delhi", "CEPT Ahmedabad", "SPA Vijayawada", "M.S. Ramaiah College of Architecture", "Aayojan School of Architecture Jaipur"],
+            jobDesc: "A Landscape Architect designs outdoor spaces — parks, urban plazas, golf courses, resort gardens, institutional campuses, and ecological corridors. They balance aesthetics with environmental sustainability, stormwater management, and biodiversity. The profession is growing with India's emphasis on green infrastructure and urban forests.",
+            salary: { min: "₹3–5 LPA (Entry Level)", mid: "₹8–16 LPA (Project Lead)", max: "₹20–40 LPA (Principal/Firm Owner)" },
+            salaryPct: 55,
+            recruiters: ["CPWD", "NDMC", "Shapoorji Pallonji", "DLF Foundation", "Jurong Consultants India", "Oberoi Hotels Group"],
+            skills: ["AutoCAD / SketchUp / Rhino", "Planting design", "Ecological restoration", "Irrigation design", "Environmental planning"]
+          }
+        ]
+      },
+      {
+        name: "Aviation & Defence",
+        dot: "#042C53",
+        professions: [
+          {
+            id: "commercial_pilot",
+            icon: "✈️",
+            name: "Commercial Pilot",
+            hint: "Flying commercial airlines",
+            category: "Aviation & Defence",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics (Mandatory)", "English (Mandatory)", "Chemistry"],
+            exams: ["DGCA Class 2 Medical", "Private Pilot Licence (PPL)", "Commercial Pilot Licence (CPL) – DGCA regulated", "ATPL for captaincy"],
+            degrees: ["Class 12 PCM – Minimum Qualification", "CPL Training at DGCA-approved Flying Schools (18 months–2 yrs, 200 hrs flying)", "Type Rating for specific aircraft (B737/A320)"],
+            topColleges: ["Indira Gandhi Rashtriya Uran Akademi (IGRUA) Rae Bareli", "Government Flying Training School (GFTS) Bengaluru", "National Flying Training Institute (NFTI) Gondia", "CAE Oxford India", "Asia Pacific Flight Training"],
+            jobDesc: "A Commercial Pilot (First Officer / Captain) flies passenger and cargo aircraft for scheduled airlines, charter services, and cargo carriers. They are responsible for the safe operation of the aircraft, crew coordination, navigation, and emergency management. IndiGo, Air India, and SpiceJet hire thousands of pilots annually as India's aviation market is the world's fastest-growing.",
+            salary: { min: "₹1–2 LPA (PPL Training)", mid: "₹15–30 LPA (First Officer)", max: "₹50–80 LPA (Senior Captain)" },
+            salaryPct: 88,
+            recruiters: ["IndiGo", "Air India", "SpiceJet", "Akasa Air", "Vistara", "Blue Dart Aviation", "Pawan Hans Helicopters"],
+            skills: ["Aircraft systems knowledge", "Instrument flight rules (IFR)", "CRM (Crew Resource Management)", "Navigation & meteorology", "Emergency procedures"]
+          },
+          {
+            id: "defence_officer",
+            icon: "🎖️",
+            name: "Defence Officer",
+            hint: "Army, Navy or Air Force officer",
+            category: "Aviation & Defence",
+            stream: "Science (PCM)",
+            subjects: ["Maths (Mandatory)", "Physics", "English (Mandatory)", "Chemistry"],
+            exams: ["NDA – National Defence Academy Exam (UPSC)", "CDS – Combined Defence Services Exam", "AFCAT – Air Force Common Admission Test", "SSB (Services Selection Board) Interview"],
+            degrees: ["B.Tech – Defence Technology (NDA, 3 yrs)", "B.Sc – Computer Science / Maths / Physics (via NDA)", "Graduation through military academies (IMA Dehradun, INA Ezhimala, AFA Hyderabad)"],
+            topColleges: ["NDA – National Defence Academy, Khadakwasla", "IMA – Indian Military Academy, Dehradun", "INA – Indian Naval Academy, Ezhimala", "AFA – Air Force Academy, Hyderabad", "OTA Chennai (Short Service Commission)"],
+            jobDesc: "A Defence Officer (Lieutenant / Flying Officer / Sub-Lieutenant at entry) commands troops, leads missions, operates advanced weapon systems, and manages defence logistics. The Indian Armed Forces offer careers across combat arms, engineering, signals, intelligence, medical, legal, and administrative branches. It is one of India's most respected and comprehensive career paths.",
+            salary: { min: "₹56,100–77,000/month (Lt/Cadet)", mid: "₹1.5–3 LPA (Annual Increment + DA + Allowances)", max: "Comprehensive package with canteen, housing, medical, pension" },
+            salaryPct: 78,
+            recruiters: ["Indian Army", "Indian Navy", "Indian Air Force", "Coast Guard", "Border Security Force (BSF)"],
+            skills: ["Leadership & command", "Weapons & tactical training", "Physical fitness", "Strategic thinking", "Crisis management"]
+          }
+        ]
+      }
+    ]
+  },
+
+  commerce: {
+    name: "Commerce",
+    subtitle: "Business & Finance Focus — Accounting, Management & Corporate Careers",
+    color: "#BA7517",
+    cardClass: "commerce-card",
+    badgeClass: "badge-commerce",
+    iconBg: "#FAEEDA",
+    categories: [
+      {
+        name: "Accounting & Auditing",
+        dot: "#BA7517",
+        professions: [
+          {
+            id: "chartered_accountant",
+            icon: "📒",
+            name: "Chartered Accountant (CA)",
+            hint: "Audit, tax & financial reporting",
+            category: "Accounting & Auditing",
+            stream: "Commerce",
+            subjects: ["Accountancy (Mandatory)", "Business Studies", "Economics", "Maths/Applied Maths", "English"],
+            exams: ["CA Foundation (after Class 12)", "CA Intermediate (IPCC)", "CA Final – all conducted by ICAI"],
+            degrees: ["CA Qualification (ICAI – 3 stages: Foundation → Intermediate → Final + 3-year Articleship)", "B.Com (optional alongside CA)", "LLB (optional for tax specialisation)"],
+            topColleges: ["ICAI (Institute of Chartered Accountants of India) – National regulator", "SRCC Delhi (B.Com + CA coaching)", "Christ University Bengaluru", "St. Xavier's College Mumbai", "Loyola College Chennai"],
+            jobDesc: "A Chartered Accountant is one of India's most prestigious qualifications, enabling professionals to audit company accounts, file statutory returns, advise on taxation (GST, income tax, transfer pricing), perform forensic accounting, and provide financial advisory. CAs serve as Finance Directors, CFOs, and partners in the Big 4 firms (Deloitte, EY, PwC, KPMG).",
+            salary: { min: "₹6–9 LPA (Fresher CA)", mid: "₹15–30 LPA (Senior/Manager)", max: "₹50 LPA–1 Cr+ (Partner/CFO)" },
+            salaryPct: 90,
+            recruiters: ["Deloitte India", "EY India", "PwC India", "KPMG India", "Grant Thornton", "Reliance Industries", "HDFC Bank"],
+            skills: ["Financial reporting (Ind AS / IFRS)", "Taxation (GST & Income Tax)", "Statutory audit", "Financial analysis & modelling", "Risk management"]
+          },
+          {
+            id: "cma",
+            icon: "📊",
+            name: "Cost & Management Accountant (CMA)",
+            hint: "Cost control & management accounting",
+            category: "Accounting & Auditing",
+            stream: "Commerce",
+            subjects: ["Accountancy (Mandatory)", "Business Studies", "Economics", "Maths", "English"],
+            exams: ["CMA Foundation Exam", "CMA Intermediate Exam", "CMA Final Exam – all by ICMAI (Institute of Cost Accountants of India)"],
+            degrees: ["CMA Qualification (3 stages + Practical Training)", "B.Com (alongside CMA)", "Optional: MBA Finance / CIMA UK for international practice"],
+            topColleges: ["ICMAI (Institute of Cost Accountants of India) – Regulator", "SRCC Delhi", "Presidency College Kolkata", "Narsee Monjee College Mumbai", "Loyola College Chennai"],
+            jobDesc: "A Cost & Management Accountant specialises in cost accounting, budget management, internal audit, and management control systems. They are crucial in manufacturing companies, PSUs, and infrastructure firms where cost control drives profitability. CMAs also work in financial analytics, ERP implementation, and strategic planning.",
+            salary: { min: "₹4–7 LPA (Entry Level)", mid: "₹10–20 LPA (Mid Level)", max: "₹30–60 LPA (CFO/Finance Head)" },
+            salaryPct: 72,
+            recruiters: ["Steel Authority of India (SAIL)", "Tata Steel", "Maruti Suzuki", "ONGC", "L&T", "Hindustan Unilever", "ITC Limited"],
+            skills: ["Cost accounting & variance analysis", "Budgeting & forecasting", "Standard costing", "Internal audit", "ERP (SAP FICO)"]
+          }
+        ]
+      },
+      {
+        name: "Finance & Investment",
+        dot: "#854F0B",
+        professions: [
+          {
+            id: "investment_banker",
+            icon: "🏦",
+            name: "Investment Banker",
+            hint: "Mergers, IPOs & capital markets",
+            category: "Finance & Investment",
+            stream: "Commerce",
+            subjects: ["Accountancy", "Economics (Mandatory)", "Business Studies", "Maths (Mandatory)", "English"],
+            exams: ["CAT / XAT / NMAT / SNAP (for MBA)", "GMAT (for global MBA)", "CFA (optional but highly valued)", "SEBI research exams"],
+            degrees: ["B.Com / BBA / BMS (3 yrs)", "MBA – Finance (2 yrs) from IIM/ISB", "CFA – Chartered Financial Analyst (3 levels, international)"],
+            topColleges: ["IIM Ahmedabad", "IIM Bangalore", "ISB Hyderabad", "IIM Calcutta", "XLRI Jamshedpur", "FMS Delhi", "MDI Gurgaon"],
+            jobDesc: "An Investment Banker advises corporations, governments, and institutions on major financial transactions — IPOs, mergers & acquisitions, debt restructuring, and private equity deals. India's booming capital market (NSE/BSE) and startup ecosystem have created significant demand for investment banking professionals at bulge bracket (Goldman Sachs, JPMorgan) and domestic banks.",
+            salary: { min: "₹8–15 LPA (Analyst)", mid: "₹25–50 LPA (Associate/VP)", max: "₹1 Cr+ (Director/MD)" },
+            salaryPct: 95,
+            recruiters: ["Goldman Sachs India", "JPMorgan India", "Morgan Stanley India", "Kotak Investment Banking", "Axis Capital", "ICICI Securities"],
+            skills: ["Financial modelling (DCF / LBO / M&A)", "Valuation techniques", "Capital markets knowledge", "Pitch book creation", "Bloomberg / Thomson Reuters"]
+          },
+          {
+            id: "frm",
+            icon: "⚖️",
+            name: "Financial Risk Manager (FRM)",
+            hint: "Banking & financial risk",
+            category: "Finance & Investment",
+            stream: "Commerce",
+            subjects: ["Accountancy", "Economics (Mandatory)", "Business Studies", "Maths (Mandatory)", "English"],
+            exams: ["FRM Exam Parts I & II (GARP – Global Association of Risk Professionals)", "CAT/XAT (for MBA Finance)", "NISM (for banking roles in India)"],
+            degrees: ["B.Com / BBA / B.Sc Statistics (3 yrs)", "MBA – Finance / Risk Management", "FRM Certification (international standard)"],
+            topColleges: ["IIM Ahmedabad", "IIM Calcutta", "IIFT Delhi", "ISB Hyderabad", "IIT Mumbai (Finance & Control)", "Symbiosis School of Banking & Finance"],
+            jobDesc: "A Financial Risk Manager identifies, assesses, and mitigates financial risks such as credit risk, market risk, operational risk, and liquidity risk in banks, insurance firms, and asset management companies. They use quantitative models and stress testing to ensure financial institutions comply with RBI, SEBI, and IRDAI regulations.",
+            salary: { min: "₹6–10 LPA (Junior Risk Analyst)", mid: "₹15–30 LPA (Risk Manager)", max: "₹40–80 LPA (CRO/Head of Risk)" },
+            salaryPct: 82,
+            recruiters: ["HDFC Bank", "ICICI Bank", "State Bank of India", "Kotak Mahindra Bank", "Nomura", "Credit Suisse India", "RBI"],
+            skills: ["Credit risk modelling", "Value at Risk (VaR)", "Basel III compliance", "Derivatives & hedging", "MATLAB / Python for quantitative analysis"]
+          },
+          {
+            id: "equity_research",
+            icon: "📉",
+            name: "Equity Research Analyst",
+            hint: "Stock analysis & investment reports",
+            category: "Finance & Investment",
+            stream: "Commerce",
+            subjects: ["Accountancy", "Economics (Mandatory)", "Business Studies", "Maths (Mandatory)", "English"],
+            exams: ["CFA (Levels I, II, III – highly recommended)", "NISM Series XV (Research Analyst)", "CAT/XAT (for MBA Finance path)"],
+            degrees: ["B.Com / BBA / B.Sc Economics (3 yrs)", "MBA – Finance / CFA designation", "NISM Research Analyst Certification (mandatory for SEBI registration)"],
+            topColleges: ["IIM Ahmedabad", "IIM Bangalore", "SRCC Delhi (B.Com)", "St. Xavier's College Mumbai", "Presidency College Kolkata"],
+            jobDesc: "An Equity Research Analyst analyses publicly listed companies, studies industry trends, builds financial models, and publishes buy/sell/hold recommendations on stocks for investors (Sell-side) or to guide the firm's own investment portfolio (Buy-side). They track earnings calls, quarterly results, and macroeconomic data to provide actionable investment insights.",
+            salary: { min: "₹5–9 LPA (Junior Analyst)", mid: "₹15–28 LPA (Senior Analyst)", max: "₹40–80 LPA (Head of Research / Fund Manager)" },
+            salaryPct: 84,
+            recruiters: ["Motilal Oswal Securities", "Kotak Securities", "ICICI Direct", "Emkay Global", "HDFC Securities", "Edelweiss Research"],
+            skills: ["Financial statement analysis", "DCF & comparable company analysis", "Sector research", "Bloomberg Terminal", "Report writing & communication"]
+          }
+        ]
+      },
+      {
+        name: "Corporate Governance & Legal",
+        dot: "#BA7517",
+        professions: [
+          {
+            id: "company_secretary",
+            icon: "🗂️",
+            name: "Company Secretary (CS)",
+            hint: "Corporate compliance & governance",
+            category: "Corporate Governance & Legal",
+            stream: "Commerce",
+            subjects: ["Accountancy", "Business Studies (Mandatory)", "Economics", "English (Mandatory)", "Maths"],
+            exams: ["CS Foundation (after Class 12)", "CS Executive", "CS Professional – all by ICSI"],
+            degrees: ["CS Qualification (3 stages: Foundation → Executive → Professional + 16-month training)", "B.Com / LLB alongside CS"],
+            topColleges: ["ICSI (Institute of Company Secretaries of India) – Regulator", "Delhi University (B.Com)", "Mumbai University (B.Com + CS)", "Symbiosis Law School (for LLB combination)"],
+            jobDesc: "A Company Secretary is a key officer in Indian companies under the Companies Act 2013, responsible for legal compliance, corporate governance, board secretarial work, and liaison with SEBI, ROC, and stock exchanges. They prepare board meeting minutes, draft shareholder resolutions, handle mergers, and ensure regulatory filings. Mandatory in listed companies with a paid-up capital above ₹5 crore.",
+            salary: { min: "₹4–7 LPA (Junior CS)", mid: "₹10–20 LPA (Senior CS)", max: "₹25–50 LPA (Group CS/CFO)" },
+            salaryPct: 68,
+            recruiters: ["Tata Group", "Reliance Industries", "Infosys", "Wipro", "HDFC Bank", "Stock Exchange Listed Companies", "Law Firms"],
+            skills: ["Companies Act 2013", "SEBI regulations & LODR compliance", "FEMA & RBI regulations", "Corporate governance frameworks", "Secretarial standards"]
+          },
+          {
+            id: "tax_consultant",
+            icon: "🧾",
+            name: "Corporate Tax Consultant",
+            hint: "GST, income tax & transfer pricing",
+            category: "Corporate Governance & Legal",
+            stream: "Commerce",
+            subjects: ["Accountancy (Mandatory)", "Business Studies", "Economics", "English", "Maths"],
+            exams: ["CA Foundation (ICAI) – preferred route", "LLB (for legal aspects of taxation)", "CPA (optional for international tax)"],
+            degrees: ["B.Com + CA / LLB (best combination)", "MBA – Taxation", "LLM – Tax Law (optional for advanced corporate tax)"],
+            topColleges: ["ICAI (CA)", "National Law University Delhi (LLM)", "NUJS Kolkata", "Gujarat National Law University", "Symbiosis Law School"],
+            jobDesc: "A Corporate Tax Consultant advises businesses on minimising tax liability while complying with Indian tax law — Income Tax Act, GST, Customs, and international tax treaties. They handle transfer pricing documentation, advance tax planning, tax audits, and litigation before the Income Tax Appellate Tribunal (ITAT). India's complex GST regime and BEPS regulations create consistent demand.",
+            salary: { min: "₹4–8 LPA (Junior Consultant)", mid: "₹12–25 LPA (Manager)", max: "₹40–80 LPA (Partner/Senior Director)" },
+            salaryPct: 76,
+            recruiters: ["Deloitte India", "EY India", "PwC India", "KPMG India", "AZB & Partners", "Lakshmikumaran & Sridharan"],
+            skills: ["GST law & compliance", "Income Tax Act", "Transfer pricing", "International taxation (DTAA)", "Tax litigation & dispute resolution"]
+          }
+        ]
+      },
+      {
+        name: "Management & Strategy",
+        dot: "#633806",
+        professions: [
+          {
+            id: "product_manager",
+            icon: "🎯",
+            name: "Product Manager",
+            hint: "Tech product strategy & roadmaps",
+            category: "Management & Strategy",
+            stream: "Commerce",
+            subjects: ["Business Studies", "Economics", "Accountancy", "Maths", "English"],
+            exams: ["CAT / XAT / NMAT / SNAP (for MBA)", "Direct entry in startups via BBA/B.Tech"],
+            degrees: ["BBA / BMS (3 yrs)", "MBA – General / Strategy / Marketing (2 yrs from top B-school)", "B.Tech + MBA (strong profile for tech PM)"],
+            topColleges: ["IIM Ahmedabad", "IIM Bangalore", "IIM Calcutta", "ISB Hyderabad", "MDI Gurgaon", "SP Jain Mumbai", "XLRI Jamshedpur"],
+            jobDesc: "A Product Manager (PM) defines the vision, strategy, and roadmap for a product or product line. They work with engineers, designers, marketing, and business stakeholders to build products that solve user problems and drive business growth. India's thriving startup ecosystem (Flipkart, Swiggy, CRED, Razorpay) and tech MNCs have made PM one of the most coveted roles in the country.",
+            salary: { min: "₹8–15 LPA (APM/Junior PM)", mid: "₹20–40 LPA (Senior PM)", max: "₹60 LPA–1.5 Cr (Group PM/Director)" },
+            salaryPct: 92,
+            recruiters: ["Amazon India", "Flipkart", "Swiggy", "PhonePe", "Razorpay", "Microsoft India", "Google India", "Paytm"],
+            skills: ["Product roadmapping", "User research & UX thinking", "Data analytics (SQL/Excel)", "Agile/Scrum", "Stakeholder management"]
+          },
+          {
+            id: "hr_director",
+            icon: "👥",
+            name: "HR Director",
+            hint: "People management & talent strategy",
+            category: "Management & Strategy",
+            stream: "Commerce",
+            subjects: ["Business Studies", "Economics", "Psychology (optional but useful)", "English (Mandatory)", "Maths"],
+            exams: ["CAT / XAT / NMAT (for MBA HR)", "TISS NET (for TISS Mumbai HRM)", "XAT (for XLRI HRM – top HR programme in India)"],
+            degrees: ["BBA / B.Com (3 yrs)", "MBA – Human Resource Management (2 yrs)", "PGDHRM (optional PG Diploma)"],
+            topColleges: ["XLRI Jamshedpur (HRM Programme – #1 in HR)", "TISS Mumbai", "IIM Ahmedabad", "IIM Bangalore", "Symbiosis Institute of Business Management"],
+            jobDesc: "An HR Director leads the entire human resources function of an organisation — talent acquisition, performance management, compensation & benefits, learning & development, employee relations, and HR technology. As India's gig economy and hybrid work culture evolve, CHROs (Chief Human Resources Officers) are strategic partners on the board.",
+            salary: { min: "₹4–7 LPA (HR Executive)", mid: "₹15–30 LPA (HR Manager/HRBP)", max: "₹50–1 Cr (CHRO/HR Director)" },
+            salaryPct: 78,
+            recruiters: ["Infosys", "TCS", "HCL Technologies", "HDFC Bank", "Hindustan Unilever", "Aon Hewitt", "Mercer India"],
+            skills: ["Talent acquisition (ATS tools)", "Performance management systems", "HRIS (Workday/SAP SuccessFactors)", "Labour law (ID Act, PF, ESIC)", "Organisational development"]
+          },
+          {
+            id: "digital_marketing_manager",
+            icon: "📱",
+            name: "Digital Marketing Manager",
+            hint: "SEO, social media & online ads",
+            category: "Management & Strategy",
+            stream: "Commerce",
+            subjects: ["Business Studies (Mandatory)", "Economics", "Accountancy", "English (Mandatory)", "Maths"],
+            exams: ["CAT / XAT / NMAT (for MBA Marketing)", "Direct entry into agencies with BBA/BMM"],
+            degrees: ["BBA / BMM – Bachelor of Mass Media / B.Com (3 yrs)", "MBA – Marketing (2 yrs)", "Google / Meta / HubSpot Certifications (complementary)"],
+            topColleges: ["IIM Ahmedabad", "IIM Bangalore", "IIM Kozhikode (known for marketing)", "Mudra Institute of Communications Ahmedabad (MICA)", "Symbiosis Pune", "SP Jain Mumbai"],
+            jobDesc: "A Digital Marketing Manager plans and executes online marketing strategies across search (SEO/SEM), social media, email, content, and performance marketing channels. They analyse campaign data, manage budgets, and optimise return on ad spend (ROAS). India's internet economy is the world's third largest, creating massive demand for digital marketing talent.",
+            salary: { min: "₹3–6 LPA (Executive)", mid: "₹10–22 LPA (Manager)", max: "₹30–60 LPA (VP/CMO)" },
+            salaryPct: 70,
+            recruiters: ["WPP India (Ogilvy, JWT)", "Publicis India", "iProspect", "Dentsu India", "Flipkart", "Amazon India", "Swiggy", "Nykaa"],
+            skills: ["SEO & SEM (Google Ads)", "Social media marketing (Meta/LinkedIn Ads)", "Content marketing", "Marketing analytics (GA4)", "CRM (HubSpot/Salesforce)"]
+          }
+        ]
+      }
+    ]
+  },
+
+  arts: {
+    name: "Arts & Humanities",
+    subtitle: "Creative & Social Focus — Law, Psychology, Media, Design & Civil Services",
+    color: "#534AB7",
+    cardClass: "arts-card",
+    badgeClass: "badge-arts",
+    iconBg: "#EEEDFE",
+    categories: [
+      {
+        name: "Law & Judiciary",
+        dot: "#534AB7",
+        professions: [
+          {
+            id: "corporate_lawyer",
+            icon: "⚖️",
+            name: "Corporate Lawyer",
+            hint: "Business law & M&A deals",
+            category: "Law & Judiciary",
+            stream: "Arts & Humanities",
+            subjects: ["Political Science/Sociology", "History", "English (Mandatory)", "Economics", "Legal Studies (if available)"],
+            exams: ["CLAT – Common Law Admission Test (for NLUs)", "AILET (for NLU Delhi)", "LSAT India", "SET (Symbiosis Entrance Test)"],
+            degrees: ["5-year Integrated BA-LLB or BBA-LLB (preferred for corporate law)", "LLM – Corporate / Commercial Law (optional)", "Bar Council of India Enrolment"],
+            topColleges: ["NLSIU Bengaluru (NLU #1)", "NALSAR Hyderabad", "NLU Delhi (via AILET)", "NLU Jodhpur", "Symbiosis Law School Pune", "Jindal Global Law School"],
+            jobDesc: "A Corporate Lawyer advises companies on legal matters relating to business transactions, mergers & acquisitions, joint ventures, corporate governance, contracts, securities law, and regulatory compliance. India's top corporate law firms (AZB & Partners, Cyril Amarchand Mangaldas, Shardul Amarchand Mangaldas) handle billion-dollar deals and IPO documentation.",
+            salary: { min: "₹8–15 LPA (Associate at Top Firm)", mid: "₹25–50 LPA (Senior Associate/Counsel)", max: "₹80 LPA–2 Cr (Partner/General Counsel)" },
+            salaryPct: 88,
+            recruiters: ["AZB & Partners", "Cyril Amarchand Mangaldas", "Shardul Amarchand Mangaldas", "Khaitan & Co", "JSA India", "Trilegal", "In-house: Infosys, Tata Group"],
+            skills: ["Contract drafting & negotiation", "M&A due diligence", "SEBI / Companies Act compliance", "Corporate restructuring", "Legal research (Manupatra/SCC Online)"]
+          },
+          {
+            id: "criminal_advocate",
+            icon: "🔨",
+            name: "Criminal Advocate",
+            hint: "Criminal defence & prosecution",
+            category: "Law & Judiciary",
+            stream: "Arts & Humanities",
+            subjects: ["Political Science/Sociology", "History", "English (Mandatory)", "Legal Studies", "Economics"],
+            exams: ["CLAT", "AILET", "LSAT India", "State Bar Council Enrolment after graduation"],
+            degrees: ["5-year Integrated BA-LLB (preferred)", "3-year LLB (after graduation)", "Optional: LLM – Criminal Law", "Judicial Services Exam (for becoming a Judge)"],
+            topColleges: ["NLSIU Bengaluru", "NALSAR Hyderabad", "NLU Jodhpur", "NUJS Kolkata", "Campus Law Centre, Delhi University", "Government Law College Mumbai"],
+            jobDesc: "A Criminal Advocate represents clients (accused or victims) in criminal proceedings before sessions courts, High Courts, and the Supreme Court. They handle cases ranging from IPC offences, POCSO, NDPS, white-collar crime, and cases under special laws. Senior criminal lawyers argue High Court and Supreme Court matters and build reputations as legendary orators.",
+            salary: { min: "₹2–5 LPA (Junior Lawyer)", mid: "₹8–25 LPA (Senior/High Court)", max: "₹50 LPA–5 Cr+ (Senior Advocate/SC)" },
+            salaryPct: 80,
+            recruiters: ["District Courts", "High Courts", "Supreme Court Bar Association", "State/Central Government Prosecution", "NGOs & Legal Aid organisations"],
+            skills: ["Criminal law (IPC, CrPC, Evidence Act)", "Courtroom advocacy", "Cross-examination", "Legal research & drafting", "Negotiation & client counselling"]
+          },
+          {
+            id: "cyber_law_expert",
+            icon: "🔐",
+            name: "Cyber Law Expert",
+            hint: "IT law & digital crime",
+            category: "Law & Judiciary",
+            stream: "Arts & Humanities",
+            subjects: ["Political Science", "English (Mandatory)", "Computer Science (advantageous)", "Economics", "Legal Studies"],
+            exams: ["CLAT", "AILET", "LSAT India", "Certified Ethical Hacker (CEH) – optional for technical cyber law"],
+            degrees: ["5-year Integrated BA-LLB / B.Tech + LLB", "LLM – Cyber Law / IPR / Technology Law (2 yrs)", "PG Diploma in Cyber Laws (NALSAR, NLSIU)"],
+            topColleges: ["NALSAR Hyderabad (LLM Cyber Law)", "NLSIU Bengaluru", "Symbiosis Law School Pune", "Amity Law School Noida", "Asian Law College Noida"],
+            jobDesc: "A Cyber Law Expert specialises in laws governing the digital space — the Information Technology Act 2000, data privacy (Personal Data Protection Bill/DPDP Act), cybercrime, intellectual property in the digital realm, e-commerce regulations, and cyber defamation. India's digital explosion and CERT-In mandates have made this one of the fastest-growing legal specialisations.",
+            salary: { min: "₹5–8 LPA (Junior Cyber Law Advocate)", mid: "₹15–30 LPA (Cyber Law Counsel)", max: "₹50–1 Cr (Senior Consultant/Partner)" },
+            salaryPct: 82,
+            recruiters: ["CERT-In", "National Cyber Crime Reporting Portal (MHA)", "Cyberabad Cyber Crime Police", "Technology Law Firms", "IT Companies (Infosys, TCS – Legal Teams)"],
+            skills: ["IT Act 2000 & DPDP Act", "Cybercrime investigation", "Data privacy law (GDPR equivalent)", "Intellectual property in digital media", "Cyber forensics fundamentals"]
+          }
+        ]
+      },
+      {
+        name: "Mental Health & Social Sciences",
+        dot: "#7F77DD",
+        professions: [
+          {
+            id: "clinical_psychologist",
+            icon: "🧠",
+            name: "Clinical Psychologist",
+            hint: "Mental health diagnosis & therapy",
+            category: "Mental Health & Social Sciences",
+            stream: "Arts & Humanities",
+            subjects: ["Psychology (Mandatory – if available)", "Sociology", "English (Mandatory)", "Political Science / Biology", "Economics"],
+            exams: ["CUET (for BA Psychology at Central Universities)", "Mumbai University entrance", "TISS NET", "Jamia BA entrance", "RCI-approved institutes for clinical programmes"],
+            degrees: ["BA / B.Sc – Psychology (3 yrs)", "MA / M.Sc – Clinical Psychology (2 yrs)", "M.Phil – Clinical Psychology (2 yrs, RCI mandated)", "PhD – Psychology (optional, for research)"],
+            topColleges: ["NIMHANS Bengaluru (M.Phil Clinical Psych #1)", "TISS Mumbai", "Delhi University", "Jamia Millia Islamia", "Christ University Bengaluru", "CMR University"],
+            jobDesc: "A Clinical Psychologist assesses, diagnoses, and treats individuals with mental health disorders such as depression, anxiety, OCD, PTSD, schizophrenia, and personality disorders using evidence-based psychotherapy (CBT, DBT, psychoanalysis). They work in hospitals, psychiatric institutions, private practice, schools, and NGOs. India faces a severe mental health workforce shortage making this profession critical.",
+            salary: { min: "₹3–6 LPA (Entry Level)", mid: "₹8–16 LPA (Experienced Practitioner)", max: "₹20–40 LPA (Senior/Private Practice)" },
+            salaryPct: 62,
+            recruiters: ["NIMHANS", "AIIMS Psychiatry", "iCall (TISS)", "Vandrevala Foundation", "Fortis Mental Health", "Private Therapy Clinics", "Corporates (EAP programmes)"],
+            skills: ["Psychological assessment (MMPI, Rorschach)", "CBT & DBT therapy", "Neuropsychological testing", "Crisis intervention", "Mental Status Examination (MSE)"]
+          },
+          {
+            id: "industrial_psychologist",
+            icon: "🏢",
+            name: "Industrial Psychologist",
+            hint: "Workplace behaviour & HR psychology",
+            category: "Mental Health & Social Sciences",
+            stream: "Arts & Humanities",
+            subjects: ["Psychology (Mandatory)", "Sociology", "English (Mandatory)", "Economics", "Business Studies (advantageous)"],
+            exams: ["CUET", "TISS NET", "Jamia Millia entrance", "XLRI (for OB/HRM pathway)"],
+            degrees: ["BA / B.Sc – Psychology (3 yrs)", "MA/M.Sc – Industrial/Organisational Psychology (2 yrs)", "MBA – HR (alternate corporate route)"],
+            topColleges: ["TISS Mumbai", "XLRI Jamshedpur", "Delhi University (DU)", "Christ University Bengaluru", "Fergusson College Pune"],
+            jobDesc: "An Industrial-Organisational (I/O) Psychologist applies psychological principles to workplace settings to improve productivity, employee well-being, leadership, and organisational culture. They design selection assessments, conduct training needs analysis, manage talent programmes, and advise on organisational change. Major corporations and consulting firms employ I/O psychologists in their HR and OD teams.",
+            salary: { min: "₹3.5–6 LPA (Entry Level)", mid: "₹8–18 LPA (Mid Level)", max: "₹25–50 LPA (Senior Consultant/Director)" },
+            salaryPct: 65,
+            recruiters: ["Aon India", "Mercer India", "Deloitte HR Consulting", "IBM India", "Infosys", "HCL Technologies", "Tata Group HR"],
+            skills: ["Psychometric assessment design", "Organisational behaviour analysis", "Training & development", "Employee engagement surveys", "Talent analytics"]
+          },
+          {
+            id: "career_counsellor",
+            icon: "🗣️",
+            name: "Career Counsellor",
+            hint: "Student guidance & career planning",
+            category: "Mental Health & Social Sciences",
+            stream: "Arts & Humanities",
+            subjects: ["Psychology (Mandatory)", "Sociology", "English (Mandatory)", "Education (optional)", "Economics"],
+            exams: ["CUET (for BA Psychology)", "IGNOU entrance (for B.Ed/PG Diploma)", "ICF Certification (for Coaching)"],
+            degrees: ["BA / B.Sc – Psychology (3 yrs)", "MA – Psychology / Education / Counselling (2 yrs)", "PG Diploma in Guidance & Counselling (NCERT/IGNOU)", "Global Certification: NCC (Nationally Certified Counselor) / ICF Coach"],
+            topColleges: ["TISS Mumbai", "Delhi University", "Jamia Millia Islamia", "Christ University Bengaluru", "NCERT (for school counselling training)"],
+            jobDesc: "A Career Counsellor helps students and professionals identify their strengths, interests, and career options through aptitude tests, counselling sessions, and informational guidance. They work in schools, colleges, private counselling centres, ed-tech platforms, and corporate L&D departments. India's massive young population and high academic pressure create significant demand for qualified career counsellors.",
+            salary: { min: "₹2.5–5 LPA (School/College)", mid: "₹6–14 LPA (Corporate/Private)", max: "₹18–35 LPA (Senior/Own Practice/Ed-Tech)" },
+            salaryPct: 52,
+            recruiters: ["Pathfinders (Career Guidance)", "iDreamCareer", "BYJU's", "Vedantu", "Schools (Central/State Board)", "Colleges", "Corporate L&D"],
+            skills: ["Career assessment tools (MBTI, Holland's RIASEC)", "Counselling techniques", "Educational system knowledge", "Psychometric testing", "Communication & empathy"]
+          }
+        ]
+      },
+      {
+        name: "Media & Communication",
+        dot: "#3C3489",
+        professions: [
+          {
+            id: "investigative_journalist",
+            icon: "📰",
+            name: "Investigative Journalist",
+            hint: "In-depth reporting & news investigation",
+            category: "Media & Communication",
+            stream: "Arts & Humanities",
+            subjects: ["English (Mandatory)", "Political Science / History", "Sociology", "Economics", "Hindi / Regional Language"],
+            exams: ["IIMC entrance exam (for PG Diploma Journalism)", "CUET (for BJMC at Central Universities)", "Jamia Mass Communication entrance", "FTII entrance"],
+            degrees: ["BJMC – Bachelor of Journalism & Mass Communication (3 yrs)", "PG Diploma in Journalism (IIMC, 1 yr)", "MA – Journalism / Communication Studies (2 yrs)"],
+            topColleges: ["IIMC (Indian Institute of Mass Communication) New Delhi", "Asian College of Journalism Chennai", "Jamia Millia Islamia Delhi", "Symbiosis Institute of Media & Communication Pune", "University of Mumbai (Mass Communication)"],
+            jobDesc: "An Investigative Journalist conducts in-depth, long-form investigations into issues of public interest — political corruption, corporate fraud, environmental crimes, and human rights violations. They work for newspapers, digital news portals, and television networks. India's growing digital journalism landscape (The Wire, Scroll, Newslaundry) and traditional media houses offer diverse opportunities.",
+            salary: { min: "₹2.5–5 LPA (Trainee/Junior Reporter)", mid: "₹8–18 LPA (Senior Journalist)", max: "₹25–50 LPA (Editor/Anchor/Senior Investigator)" },
+            salaryPct: 55,
+            recruiters: ["The Hindu", "Hindustan Times", "NDTV", "Times of India", "The Wire", "Scroll.in", "India Today Group", "BBC India"],
+            skills: ["Investigative research & FOIA/RTI", "Data journalism (Excel/Tableau)", "Video & photo journalism", "Source building & verification", "Long-form writing & editing"]
+          },
+          {
+            id: "pr_specialist",
+            icon: "📢",
+            name: "Public Relations (PR) Specialist",
+            hint: "Brand reputation & media relations",
+            category: "Media & Communication",
+            stream: "Arts & Humanities",
+            subjects: ["English (Mandatory)", "Business Studies", "Political Science", "Economics", "Sociology"],
+            exams: ["CUET (for BJMC / Mass Comm)", "IIMC entrance", "CAT (for MBA Marketing/PR MBA path)"],
+            degrees: ["BJMC / BA – Mass Communication (3 yrs)", "MBA – Marketing / PR (2 yrs)", "PG Diploma in PR & Advertising (IIMC/Symbiosis)"],
+            topColleges: ["IIMC New Delhi", "Mudra Institute of Communications Ahmedabad (MICA)", "Symbiosis Institute of Media Pune", "Xavier Institute of Communications Mumbai", "Jamia Millia Islamia"],
+            jobDesc: "A PR Specialist manages the public image and reputation of organisations, brands, and individuals. They write press releases, manage media relations, handle crisis communications, plan product launches, and manage social media narratives. India's booming FMCG, tech, and entertainment industries drive constant demand for skilled PR professionals.",
+            salary: { min: "₹3–5 LPA (Executive)", mid: "₹8–18 LPA (Senior/Manager)", max: "₹25–50 LPA (VP/PR Director)" },
+            salaryPct: 60,
+            recruiters: ["Adfactors PR", "Weber Shandwick India", "Edelman India", "Genesis BCW", "Ogilvy PR", "Ketchum Sampark", "In-house: Reliance, TCS, HUL"],
+            skills: ["Media relations & press release writing", "Crisis communications", "Social media management", "Event management", "Content strategy & storytelling"]
+          },
+          {
+            id: "content_strategist",
+            icon: "✍️",
+            name: "Content Strategist",
+            hint: "Digital content & brand storytelling",
+            category: "Media & Communication",
+            stream: "Arts & Humanities",
+            subjects: ["English (Mandatory)", "Political Science", "Sociology", "Business Studies", "Economics"],
+            exams: ["CUET (for BA English / Mass Comm)", "Direct entry in digital agencies"],
+            degrees: ["BA – English / Mass Communication / Journalism (3 yrs)", "MBA – Marketing / Digital Media (2 yrs, optional)", "Google Digital Garage / HubSpot Content Certifications (complementary)"],
+            topColleges: ["Jamia Millia Islamia", "University of Delhi (BA English)", "Symbiosis Pune", "IIMC New Delhi", "Miranda House Delhi"],
+            jobDesc: "A Content Strategist develops and executes content plans that align with brand objectives and audience needs. They plan editorial calendars, oversee SEO content creation, manage content teams, and measure content performance using analytics. In India's booming digital economy, every brand — from startups to legacy companies — needs skilled content strategists.",
+            salary: { min: "₹3–5 LPA (Content Writer/Executive)", mid: "₹8–18 LPA (Senior Strategist)", max: "₹20–40 LPA (Head of Content/Director)" },
+            salaryPct: 62,
+            recruiters: ["Zomato", "Swiggy", "Nykaa", "Myntra", "Byju's", "Content Agencies", "WPP India", "Ogilvy Content Practice"],
+            skills: ["SEO & keyword research", "Content management systems (WordPress)", "Brand voice & tone development", "Analytics (Google Analytics 4)", "Social media content planning"]
+          }
+        ]
+      },
+      {
+        name: "Creative Arts & Design",
+        dot: "#534AB7",
+        professions: [
+          {
+            id: "ux_ui_designer",
+            icon: "🎨",
+            name: "UX/UI Designer",
+            hint: "User experience & interface design",
+            category: "Creative Arts & Design",
+            stream: "Arts & Humanities",
+            subjects: ["Fine Arts / Drawing (Mandatory)", "English (Mandatory)", "Computer Science (advantageous)", "Maths", "Sociology"],
+            exams: ["UCEED – Undergraduate Common Entrance Exam for Design (for IIT Design programmes)", "NID DAT (for NID)", "NIFT entrance (for Fashion/Accessory Design)", "CEED (PG level)"],
+            degrees: ["B.Des – Design (4 yrs) at IITs / NID / NIFT", "BA – Visual Communication (3 yrs)", "Diploma in UI/UX Design (1–2 yrs, Udemy/Google/Coursera also valid for industry entry)"],
+            topColleges: ["NID – National Institute of Design, Ahmedabad (#1 India)", "IDC School of Design, IIT Bombay", "IIT Guwahati (Design)", "NIFT Delhi", "Srishti Institute of Art, Design & Technology Bengaluru"],
+            jobDesc: "A UX/UI Designer creates the look, feel, and interaction design of digital products — apps, websites, and software. UX (User Experience) focuses on research, usability, and information architecture, while UI (User Interface) focuses on visual design and interactive elements. India's tech and startup ecosystem has made design one of the highest-demand skills, with salaries rivalling software engineers.",
+            salary: { min: "₹4–8 LPA (Junior Designer)", mid: "₹12–25 LPA (Senior Designer)", max: "₹35–70 LPA (Design Lead/VP Design)" },
+            salaryPct: 82,
+            recruiters: ["Flipkart Design Team", "Google India", "Microsoft India", "Razorpay", "CRED", "Swiggy", "Groww", "Dunzo", "Tata Elxsi"],
+            skills: ["Figma / Adobe XD / Sketch", "User research & usability testing", "Design systems", "Prototyping & wireframing", "Accessibility design (WCAG)"]
+          },
+          {
+            id: "fashion_designer",
+            icon: "👗",
+            name: "Fashion Designer",
+            hint: "Clothing, textiles & style",
+            category: "Creative Arts & Design",
+            stream: "Arts & Humanities",
+            subjects: ["Fine Arts / Drawing (Mandatory)", "English (Mandatory)", "Maths", "Textiles (if available)", "Sociology"],
+            exams: ["NIFT Entrance Test (for B.Des Fashion Design)", "NID DAT", "Pearl Academy entrance", "CEED (for M.Des)"],
+            degrees: ["B.Des – Fashion Design (4 yrs at NIFT / NID / Pearl Academy)", "B.Sc – Fashion Technology (4 yrs)", "Diploma in Fashion Design (2 yrs, alternate route)"],
+            topColleges: ["NIFT Delhi (#1 Fashion Institute)", "NIFT Mumbai", "NID Ahmedabad", "Pearl Academy Delhi/Mumbai", "Symbiosis Institute of Design Pune", "INIFD"],
+            jobDesc: "A Fashion Designer creates original clothing, accessories, and footwear. They research trends, sketch designs, select fabrics, and oversee production from concept to finished product. India's fashion industry spans haute couture (Sabyasachi, Manish Malhotra), ready-to-wear, export garments, and e-commerce fashion (Myntra, Meesho). Sustainable fashion and fusion ethnic wear are growing niches.",
+            salary: { min: "₹2.5–5 LPA (Design Assistant)", mid: "₹8–18 LPA (Senior Designer)", max: "₹30–80 LPA (Creative Director/Own Label)" },
+            salaryPct: 65,
+            recruiters: ["Myntra (Roadster, HRX)", "Fabindia", "Manyavar", "Westside (Trent)", "Sabyasachi Studio", "Anita Dongre Studio", "NIFT Incubation Centre"],
+            skills: ["Fashion illustration & sketching", "Draping & pattern making", "Adobe Illustrator / Photoshop", "Textile science & sourcing", "Fashion marketing & trend forecasting"]
+          },
+          {
+            id: "animator_vfx",
+            icon: "🎬",
+            name: "Animator / VFX Artist",
+            hint: "Animation, visual effects & film",
+            category: "Creative Arts & Design",
+            stream: "Arts & Humanities",
+            subjects: ["Fine Arts / Drawing (Mandatory)", "Computer Science (advantageous)", "English (Mandatory)", "Maths", "Sociology"],
+            exams: ["UCEED (for B.Des)", "FTII entrance (for Film & Television)", "NID DAT", "Direct admission to private animation schools"],
+            degrees: ["B.Des – Animation (4 yrs at IIT / NID)", "B.Sc – Animation & VFX (3–4 yrs)", "Diploma/Certificate in 3D Animation from Arena / Maac / Frameboxx"],
+            topColleges: ["IDC IIT Bombay", "NID Ahmedabad", "Srishti Bengaluru", "FTII Pune", "Arena Animation Institutes", "MAAC (Maya Academy of Advanced Cinematics)", "Pearl Academy"],
+            jobDesc: "An Animator/VFX Artist creates motion graphics, 3D animations, visual effects, and CGI for films, OTT platforms, gaming, advertising, and ed-tech. India is a major outsourcing hub for global VFX (Prime Focus, Prana Studios, Red Chillies VFX), while the gaming industry (Nazara Technologies, nCore Games) is rapidly growing. OTT boom on Netflix/Prime/Hotstar is driving domestic demand.",
+            salary: { min: "₹2.5–5 LPA (Junior Animator)", mid: "₹8–20 LPA (Senior Artist/Lead)", max: "₹30–70 LPA (VFX Supervisor/Studio Head)" },
+            salaryPct: 68,
+            recruiters: ["Prime Focus Technologies", "Prana Studios Mumbai", "Red Chillies VFX", "Tata Elxsi", "YRF VFX", "Nazara Technologies", "WNS / EXL Animations"],
+            skills: ["3D modelling (Maya / Blender)", "VFX compositing (Nuke / After Effects)", "Character rigging & animation", "Motion capture processing", "Adobe Creative Suite"]
+          }
+        ]
+      },
+      {
+        name: "Civil Services",
+        dot: "#26215C",
+        professions: [
+          {
+            id: "ias_officer",
+            icon: "🏛️",
+            name: "IAS Officer",
+            hint: "District collector & administration",
+            category: "Civil Services",
+            stream: "Arts & Humanities",
+            subjects: ["History", "Political Science (Mandatory)", "English (Mandatory)", "Economics", "Geography"],
+            exams: ["UPSC CSE – Civil Services Examination (Prelims → Mains → Interview)", "Optional subject selection at UPSC Mains stage", "LBSNAA training post selection"],
+            degrees: ["Any Bachelor's Degree (any stream, from any UGC-recognised university) – minimum eligibility", "Graduation in History/Political Science/Economics/Sociology strongly aids UPSC Mains preparation"],
+            topColleges: ["LBSNAA – Lal Bahadur Shastri National Academy of Administration, Mussoorie (IAS Training)", "Any top university for graduation: Delhi University, JNU, BHU, Hyderabad University", "Prominent coaching: Vajiram & Ravi, Vision IAS, Forum IAS"],
+            jobDesc: "An IAS (Indian Administrative Service) officer is the backbone of India's executive administration. They serve as District Collectors managing law, order, and revenue; as Joint Secretaries/Secretaries implementing national policy; and in deputation to central ministries, PSUs, and international organisations. The UPSC CSE is considered India's most competitive examination with ~0.1% selection rate.",
+            salary: { min: "₹56,100/month (Junior Scale – Pay Level 10)", mid: "₹1.44–2.18 Lakh/month (Senior Scale)", max: "₹2.5 Lakh/month (Cabinet Secretary scale) + Housing, Travel, Pension" },
+            salaryPct: 85,
+            recruiters: ["Government of India (Central Cadre)", "State Governments (State Cadres: IAS/IPS/IFS)", "PMO", "Cabinet Secretariat", "UPSC itself"],
+            skills: ["Public policy & governance", "Administrative law", "Crisis management", "Economic policy", "Leadership & people management"]
+          },
+          {
+            id: "ips_officer",
+            icon: "👮",
+            name: "IPS Officer",
+            hint: "Police & law enforcement leadership",
+            category: "Civil Services",
+            stream: "Arts & Humanities",
+            subjects: ["History", "Political Science (Mandatory)", "English (Mandatory)", "Economics", "Geography"],
+            exams: ["UPSC CSE (same as IAS – IPS allocated based on rank and preference)", "Minimum age: 21 years, Maximum: 32 years (relaxed for OBC/SC/ST)"],
+            degrees: ["Any Bachelor's Degree from a UGC-recognised university", "SVPNPA (Sardar Vallabhbhai Patel National Police Academy) training post selection"],
+            topColleges: ["SVPNPA Hyderabad (IPS Training Academy)", "Any university for graduation: Delhi University, BHU, EFLU, Osmania University"],
+            jobDesc: "An IPS (Indian Police Service) officer leads India's police forces at the district, state, and national level. Starting as an Assistant Superintendent of Police (ASP), they rise to become SP, DIG, IG, DGP, and eventually heads of agencies like CBI, IB, RAW (IFS), NIA, and CRPF. They oversee criminal investigation, law & order, counter-terrorism, and cybercrime operations.",
+            salary: { min: "₹56,100/month (ASP/DSP Pay Level 10)", mid: "₹1.44–2.18 Lakh/month (SP/SSP)", max: "₹2.25 Lakh/month (DGP Level) + Official Quarters, Security Staff, Pension" },
+            salaryPct: 83,
+            recruiters: ["Government of India", "State Police Forces", "CBI", "NIA", "IB (Intelligence Bureau)", "NSG", "CRPF", "BSF"],
+            skills: ["Criminal law (IPC, CrPC, Evidence Act)", "Investigation techniques", "Crisis management", "Leadership under pressure", "Forensic & cyber crime awareness"]
+          },
+          {
+            id: "ifs_diplomat",
+            icon: "🌍",
+            name: "IFS Foreign Diplomat",
+            hint: "Diplomacy & foreign affairs",
+            category: "Civil Services",
+            stream: "Arts & Humanities",
+            subjects: ["History", "Political Science (Mandatory)", "English (Mandatory)", "Economics", "Foreign Language (advantageous)"],
+            exams: ["UPSC CSE (IFS allocated based on rank – typically top ranks go to IAS/IPS/IFS)", "Foreign language training post selection at FSOI"],
+            degrees: ["Any Bachelor's Degree (Political Science / History / Economics / International Relations preferred)", "FSOI (Foreign Service Institute) New Delhi training post selection"],
+            topColleges: ["FSOI New Delhi (IFS Training)", "JNU – School of International Studies (preferred graduation)", "Delhi University", "Hyderabad Central University", "Presidency College Kolkata"],
+            jobDesc: "An Indian Foreign Service (IFS) officer represents India's interests abroad as Second Secretary, First Secretary, Counsellor, Deputy High Commissioner/Ambassador. They negotiate international treaties, manage bilateral relations, protect Indian citizens abroad (consular services), promote trade, and implement India's foreign policy. Postings span the UN, G20, BRICS, SAARC, and bilateral missions worldwide.",
+            salary: { min: "₹56,100/month + Foreign Allowance (Junior Scale)", mid: "₹1.5–2.5 Lakh/month + Country-specific Foreign Allowance", max: "₹2.5 Lakh/month (Ambassador) + Official Residence Abroad, Home Leave" },
+            salaryPct: 87,
+            recruiters: ["Ministry of External Affairs (MEA)", "Indian Embassies/High Commissions Worldwide", "UN Missions", "International Organisations (UNESCO, WHO, WTO – Secondment)"],
+            skills: ["International relations & diplomacy", "Foreign language (French, Chinese, Arabic, Spanish)", "Negotiations & treaty law", "Economic diplomacy", "Cultural diplomacy & soft power"]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+let currentStream = null;
+let currentProfession = null;
+
+function updateProgress(step) {
+  [1,2,3].forEach(i => {
+    const circle = document.getElementById('step'+i+'circle');
+    const label = document.getElementById('step'+i+'label');
+    if (i < step) {
+      circle.className = 'step-circle done';
+      circle.innerHTML = '✓';
+    } else if (i === step) {
+      circle.className = 'step-circle active';
+      circle.innerHTML = i;
+      label.className = 'step-label active';
+    } else {
+      circle.className = 'step-circle';
+      circle.innerHTML = i;
+      label.className = 'step-label';
+    }
+  });
+  document.getElementById('conn1').className = 'step-connector' + (step > 1 ? ' done' : '');
+  document.getElementById('conn2').className = 'step-connector' + (step > 2 ? ' done' : '');
+}
+
+function goToStep(step) {
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step'+step).classList.remove('hidden');
+  updateProgress(step);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function selectStream(streamKey) {
+  currentStream = DATA[streamKey];
+  const step2Title = document.getElementById('step2Title');
+  const step2Subtitle = document.getElementById('step2Subtitle');
+  step2Title.textContent = currentStream.name + ' — Choose Your Profession';
+  step2Subtitle.textContent = currentStream.subtitle;
+
+  const list = document.getElementById('professionList');
+  list.innerHTML = '';
+
+  currentStream.categories.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'category-section';
+
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.innerHTML = '<div class="category-dot" style="background:' + cat.dot + '"></div><span class="category-title">' + cat.name + '</span>';
+    section.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'profession-grid';
+
+    cat.professions.forEach(prof => {
+      const card = document.createElement('div');
+      card.className = 'profession-card ' + currentStream.cardClass;
+      card.innerHTML = '<span class="prof-icon">' + prof.icon + '</span><div class="prof-name">' + prof.name + '</div><div class="prof-hint">' + prof.hint + '</div>';
+      card.onclick = () => selectProfession(prof);
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    list.appendChild(section);
+  });
+
+  goToStep(2);
+}
+
+function selectProfession(prof) {
+  currentProfession = prof;
+  renderCareerDetails(prof);
+  goToStep(3);
+}
+
+function renderCareerDetails(prof) {
+  const container = document.getElementById('careerDetails');
+
+  const streamColors = {
+    'Science (PCB)': { bg: '#E1F5EE', text: '#085041', badge: 'badge-pcb' },
+    'Science (PCM)': { bg: '#E6F1FB', text: '#0C447C', badge: 'badge-pcm' },
+    'Commerce': { bg: '#FAEEDA', text: '#633806', badge: 'badge-commerce' },
+    'Arts & Humanities': { bg: '#EEEDFE', text: '#3C3489', badge: 'badge-arts' }
+  };
+  const sc = streamColors[prof.stream] || streamColors['Science (PCB)'];
+
+  let html = '<div class="detail-header">';
+  html += '<div class="detail-icon-box" style="background:' + sc.bg + '">' + prof.icon + '</div>';
+  html += '<div>';
+  html += '<div class="detail-title">' + prof.name + '</div>';
+  html += '<div class="detail-category">' + prof.category + '</div>';
+  html += '<span class="detail-stream-badge ' + sc.badge + '">' + prof.stream + '</span>';
+  html += '</div></div>';
+
+  html += '<div class="job-desc-card">';
+  html += '<h4>What Does a ' + prof.name + ' Do?</h4>';
+  html += '<p>' + prof.jobDesc + '</p>';
+  if (prof.recruiters && prof.recruiters.length) {
+    html += '<div style="margin-top:12px;"><span style="font-size:12px;opacity:0.7;text-transform:uppercase;letter-spacing:0.5px;">Top Recruiters</span></div>';
+    html += '<div class="top-recruiters">';
+    prof.recruiters.forEach(r => { html += '<span class="recruiter-tag">' + r + '</span>'; });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="info-grid">';
+
+  // Subjects
+  html += '<div class="info-card"><div class="info-card-header"><div class="info-card-icon" style="background:#E1F5EE">📚</div><span class="info-card-title" style="color:#085041">11th & 12th Subjects</span></div>';
+  html += '<ul class="info-list">';
+  prof.subjects.forEach(s => { html += '<li>' + s + '</li>'; });
+  html += '</ul></div>';
+
+  // Entrance Exams
+  html += '<div class="info-card"><div class="info-card-header"><div class="info-card-icon" style="background:#E6F1FB">✏️</div><span class="info-card-title" style="color:#0C447C">Entrance Exams</span></div>';
+  html += '<div style="margin-top:4px;">';
+  prof.exams.forEach(e => { html += '<span class="exam-tag">' + e + '</span>'; });
+  html += '</div></div>';
+
+  html += '</div><div class="info-grid">';
+
+  // Degrees
+  html += '<div class="info-card"><div class="info-card-header"><div class="info-card-icon" style="background:#FAEEDA">🎓</div><span class="info-card-title" style="color:#633806">Degrees & Qualifications</span></div>';
+  html += '<ul class="info-list">';
+  prof.degrees.forEach(d => { html += '<li>' + d + '</li>'; });
+  html += '</ul></div>';
+
+  // Top Colleges
+  html += '<div class="info-card"><div class="info-card-header"><div class="info-card-icon" style="background:#EEEDFE">🏫</div><span class="info-card-title" style="color:#3C3489">Top Colleges</span></div>';
+  html += '<ul class="info-list">';
+  prof.topColleges.forEach(c => { html += '<li>' + c + '</li>'; });
+  html += '</ul></div>';
+
+  html += '</div>';
+
+  // Skills
+  if (prof.skills && prof.skills.length) {
+    html += '<div class="info-card" style="margin-bottom:16px;"><div class="info-card-header"><div class="info-card-icon" style="background:#E1F5EE">⚡</div><span class="info-card-title" style="color:#085041">Key Skills to Develop</span></div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">';
+    prof.skills.forEach(sk => {
+      html += '<span style="font-size:12px;font-weight:600;padding:5px 12px;background:#f0f2f8;border-radius:8px;color:#2c3e50;border:1px solid #e0e4ee;">' + sk + '</span>';
+    });
+    html += '</div></div>';
+  }
+
+  // Salary
+  html += '<div class="info-card"><div class="info-card-header"><div class="info-card-icon" style="background:#E1F5EE">💰</div><span class="info-card-title" style="color:#0F6E56">Salary Range in India</span></div>';
+  html += '<div style="font-size:13px;color:#2c3e50;padding:4px 0 2px;">' + prof.salary.min + '</div>';
+  html += '<div style="font-size:13px;color:#2c3e50;padding:4px 0 2px;">' + prof.salary.mid + '</div>';
+  html += '<div style="font-size:13px;color:#2c3e50;padding:4px 0 2px;">' + prof.salary.max + '</div>';
+  html += '<div class="salary-bar"><div class="salary-fill" style="width:' + prof.salaryPct + '%"></div></div>';
+  html += '<div class="salary-label"><span>Entry</span><span>Mid Career</span><span>Senior</span></div></div>';
+
+  container.innerHTML = html;
+}
+
+updateProgress(1);
+</script>
+</body>
+</html>
